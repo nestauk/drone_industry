@@ -43944,7 +43944,7 @@ var DronesIndustryMap = (function () {
 	    target: document.body,
 	    store,
 	    data: {
-	        withNestaFooter: true
+	        // withNestaFooter: true
 	    }
 	});
 
