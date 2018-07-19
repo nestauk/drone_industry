@@ -9502,7 +9502,7 @@ var DronesIndustryMap = (function () {
 
 	colors("b3e2cdfdcdaccbd5e8f4cae4e6f5c9fff2aef1e2cccccccc");
 
-	var Set1 = colors("e41a1c377eb84daf4a984ea3ff7f00ffff33a65628f781bf999999");
+	colors("e41a1c377eb84daf4a984ea3ff7f00ffff33a65628f781bf999999");
 
 	colors("66c2a5fc8d628da0cbe78ac3a6d854ffd92fe5c494b3b3b3");
 
@@ -27721,7 +27721,7 @@ var DronesIndustryMap = (function () {
 	return mapboxgl;
 
 	})));
-	//# sourceMappingURL=mapbox-gl.js.map
+
 	});
 
 	var mapboxgl = unwrapExports$1(mapboxGl);
@@ -43201,7 +43201,13 @@ var DronesIndustryMap = (function () {
 	function colorScale({$allEntityTypes}) {
 		return ordinal()
 	    .domain($allEntityTypes)
-	    .range(Set1);
+	    .range([
+	        "#F15235", // red
+	        "#0FC3A8", // teal
+	        "#FAD677", // yellow
+	        "#032B2F", // dark blue
+	        "rgb(152, 78, 163)" // purple
+	    ]);
 	}
 
 	function data$2() {
