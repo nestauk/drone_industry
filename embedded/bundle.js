@@ -11978,6 +11978,34 @@ var DronesIndustryMap = (function () {
 
 	const Null = lamb.always(null);
 
+	const ENTITY_TYPE_TECHNOLOGY_DEVELOPER = "Technology developer";
+
+	const ALL_ENTITY_TYPES = [
+	    ENTITY_TYPE_TECHNOLOGY_DEVELOPER,
+	    "Drone-powered service provider",
+	    "Service provider to the drone industry",
+	    "Academic / research institution",
+	    "Other drone-related entity"
+	];
+
+	const ALL_TECHNOLOGY_TYPES = [
+	    "Platforms",
+	    "UTM",
+	    "Comms",
+	    "Subsystems",
+	    "Navigation & autonomy",
+	    "Drone-data processing",
+	    "Security",
+	    "System integration / consultancy",
+	    "Other drone-related technologies",
+	    "Delivery drones",
+	    "People carrying drones",
+	    "Counter-drone"
+	];
+
+
+	/* CSV */
+
 	const isBadString = lamb.anyOf(lamb.is("FAILED"), lamb.is(""));
 
 	const processCoordValue = lamb.condition(
@@ -11986,26 +12014,38 @@ var DronesIndustryMap = (function () {
 	    Null
 	);
 
-	/* CSV */
-
 	const makeCompany = applyFnMap2({
 	    // Organisation details
 	    "Name": lamb.identity,
 	    "Project / product name": lamb.identity,
+	    // "Type (Large Co, SME, Academic, Research and Technology Organisation)": _.identity,
+	    // "Global HQ Inc Postcode where possible. ": _.identity,
+	    // "Postcode (extra)": _.identity,
+	    // "UK postcode": _.identity,
 	    "Link": lamb.identity,
-	    "Type (Large Co, SME, Academic, Research and Technology Organisation)": lamb.identity,
-	    "Global HQ Inc Postcode where possible. ": lamb.identity,
-	    "Postcode (extra)": lamb.identity,
-	    "UK postcode": lamb.identity,
 	    "Latitude": processCoordValue,
 	    "Longitude": processCoordValue,
 
-	    // Entity type
-	    "Technology Developer": Boolean,
-	    "Drone-powered services": Boolean,
-	    "Services to drone operators / industry": Boolean,
-	    "Academic / Research Institution": Boolean,
-	    "Other drone-related entitiy": Boolean,
+	    // entity types
+	    [ENTITY_TYPE_TECHNOLOGY_DEVELOPER]: Boolean,
+	    "Drone-powered service provider": Boolean,
+	    "Service provider to the drone industry": Boolean,
+	    "Academic / research institution": Boolean,
+	    "Other drone-related entity": Boolean,
+
+	    // technology types
+	    "Platforms": Boolean,
+	    "UTM": Boolean,
+	    "Comms": Boolean,
+	    "Subsystems": Boolean,
+	    "Navigation & autonomy": Boolean,
+	    "Drone-data processing": Boolean,
+	    "Security": Boolean,
+	    "System integration / consultancy": Boolean,
+	    "Other drone-related technologies": Boolean,
+	    "Delivery drones": Boolean,
+	    "People carrying drones": Boolean,
+	    "Counter-drone": Boolean
 	});
 
 	/* property getters */
@@ -12019,18 +12059,55 @@ var DronesIndustryMap = (function () {
 	    lamb.apply(lamb.collect)
 	);
 
-	// OR condition
-	const filterCompaniesWithSomeEntityTypesTrue = (allCompanies, entityTypes) => {
-	    const entityTypesGetters = makePropertiesGetters(entityTypes);
-	    const areSomeEntityTypesTrue = lamb.pipe(
-	        entityTypesGetters,
+	const isNotTechDev = lamb.not(lamb.is(ENTITY_TYPE_TECHNOLOGY_DEVELOPER));
+
+	const filterCompanies = (
+	    allCompanies,
+	    entityTypes,
+	    isTechnologyDeveloperSelected,
+	    technologyTypes
+	) => {
+	    const nonTechDevEntityTypes = lamb.filter(
+	        entityTypes,
+	        isNotTechDev
+	    );
+	    const areSomeTechnologyTypesTrue = lamb.pipe(
+	        makePropertiesGetters(technologyTypes),
 	        areSomeTrue
 	    );
 
-	    return lamb.filter(allCompanies, areSomeEntityTypesTrue)
+	    const condition = isTechnologyDeveloperSelected
+	        ? lamb.anyOf(
+	            lamb.pipe(
+	                makePropertiesGetters(nonTechDevEntityTypes),
+	                areSomeTrue
+	            ),
+	            areSomeTechnologyTypesTrue
+	        )
+	        : lamb.pipe(
+	            makePropertiesGetters(entityTypes),
+	            areSomeTrue
+	        );
+
+	    return lamb.filter(allCompanies, condition)
 	};
 
-
+	// // AND condition
+	// export const filterCompaniesWithAllEntityTypesTrue = (allCompanies, entityTypes) => {
+	//     let companies = allCompanies;
+	//
+	//     if (isIterableNotEmpty(entityTypes)) {
+	//         const entityTypesGetters = makePropertiesGetters(entityTypes);
+	//         const areAllEntityTypesTrue = _.pipe(
+	//             entityTypesGetters,
+	//             areAllTrue
+	//         );
+	//
+	//         companies = _.filter(allCompanies, areAllEntityTypesTrue)
+	//     }
+	//
+	//     return companies;
+	// }
 
 	// export const makeCompany = applyFnMap2({
 	//     // Organisation details
@@ -12057,7 +12134,7 @@ var DronesIndustryMap = (function () {
 	//     "Drone-powered services": Boolean,
 	//     "Services to drone operators / industry": Boolean,
 	//     "Academic / Research Institution": Boolean,
-	//     "Other drone-related entitiy": Boolean,
+	//     "Other drone-related entity": Boolean,
 	//
 	//     // Drone-powered Serivce Type
 	//     "Media": Boolean,
@@ -12122,7 +12199,7 @@ var DronesIndustryMap = (function () {
 	//         ["Drone-powered services", Boolean],
 	//         ["Services to drone operators / industry", Boolean],
 	//         ["Academic / Research Institution", Boolean],
-	//         ["Other drone-related entitiy", Boolean],
+	//         ["Other drone-related entity", Boolean],
 	//     ]],
 	//     ["Drone-powered Serivce Type", [
 	//         ["Media", Boolean],
@@ -12322,27 +12399,27 @@ var DronesIndustryMap = (function () {
 				input_1 = createElement("input");
 				text_8 = createText("\n    ");
 				if (if_block_1) if_block_1.c();
-				div_1.className = "items svelte-ziwyym";
+				div_1.className = "items svelte-wpfhlq";
 				addLoc(div_1, file, 6, 4, 134);
 				addListener(input, "click", click_handler_1);
 				setAttribute(input, "type", "button");
 				input.value = "Deselect all";
-				input.className = "svelte-ziwyym";
-				addLoc(input, file, 24, 16, 714);
-				div_4.className = "control svelte-ziwyym";
-				addLoc(div_4, file, 23, 12, 676);
+				input.className = "svelte-wpfhlq";
+				addLoc(input, file, 24, 16, 745);
+				div_4.className = "control svelte-wpfhlq";
+				addLoc(div_4, file, 23, 12, 707);
 				addListener(input_1, "click", click_handler_2);
 				setAttribute(input_1, "type", "button");
 				input_1.value = "Select all";
-				input_1.className = "svelte-ziwyym";
-				addLoc(input_1, file, 30, 16, 920);
-				div_5.className = "control svelte-ziwyym";
-				addLoc(div_5, file, 29, 12, 882);
-				div_3.className = "group svelte-ziwyym";
-				addLoc(div_3, file, 22, 8, 644);
-				div_2.className = "controls svelte-ziwyym";
-				addLoc(div_2, file, 21, 4, 613);
-				div.className = "barchartView svelte-ziwyym";
+				input_1.className = "svelte-wpfhlq";
+				addLoc(input_1, file, 30, 16, 951);
+				div_5.className = "control svelte-wpfhlq";
+				addLoc(div_5, file, 29, 12, 913);
+				div_3.className = "group svelte-wpfhlq";
+				addLoc(div_3, file, 22, 8, 675);
+				div_2.className = "controls svelte-wpfhlq";
+				addLoc(div_2, file, 21, 4, 644);
+				div.className = "barchartView svelte-wpfhlq";
 				addLoc(div, file, 0, 0, 0);
 			},
 
@@ -12384,7 +12461,7 @@ var DronesIndustryMap = (function () {
 					if_block = null;
 				}
 
-				if (changed.itemsWithSelection || changed.scaleX || changed.colorScale) {
+				if (changed.itemsWithSelection || changed.scaleX || changed.colorScale || changed.color) {
 					each_value = ctx.itemsWithSelection;
 
 					for (var i = 0; i < each_value.length; i += 1) {
@@ -12451,9 +12528,9 @@ var DronesIndustryMap = (function () {
 				div = createElement("div");
 				span = createElement("span");
 				text$$1 = createText(ctx.title);
-				span.className = "svelte-ziwyym";
+				span.className = "svelte-wpfhlq";
 				addLoc(span, file, 3, 8, 88);
-				div.className = "title svelte-ziwyym";
+				div.className = "title svelte-wpfhlq";
 				addLoc(div, file, 2, 4, 60);
 			},
 
@@ -12479,7 +12556,7 @@ var DronesIndustryMap = (function () {
 
 	// (8:8) {#each itemsWithSelection as {key, value, selected}}
 	function create_each_block(component, ctx) {
-		var div, div_1, span, text_value = ctx.key, text$$1, text_2, div_2, div_class_value;
+		var div, div_1, span, text_value = ctx.key, text$$1, text_1, text_2_value = ctx.value, text_2, text_3, text_5, div_2, div_class_value;
 
 		return {
 			c: function create$$1() {
@@ -12487,21 +12564,24 @@ var DronesIndustryMap = (function () {
 				div_1 = createElement("div");
 				span = createElement("span");
 				text$$1 = createText(text_value);
-				text_2 = createText("\n            ");
+				text_1 = createText(" (");
+				text_2 = createText(text_2_value);
+				text_3 = createText(")");
+				text_5 = createText("\n            ");
 				div_2 = createElement("div");
-				span.className = "svelte-ziwyym";
+				span.className = "svelte-wpfhlq";
 				addLoc(span, file, 12, 16, 377);
-				div_1.className = "label svelte-ziwyym";
+				div_1.className = "label svelte-wpfhlq";
 				addLoc(div_1, file, 11, 12, 341);
-				div_2.className = "bar svelte-ziwyym";
+				div_2.className = "bar svelte-wpfhlq";
 				setStyle(div_2, "width", "" + ctx.scaleX(ctx.value) + "px");
-				setStyle(div_2, "background-color", ctx.colorScale(ctx.key));
-				addLoc(div_2, file, 14, 12, 427);
+				setStyle(div_2, "background-color", (ctx.colorScale ? ctx.colorScale(ctx.key) : ctx.color));
+				addLoc(div_2, file, 14, 12, 437);
 
 				div._svelte = { component, ctx };
 
 				addListener(div, "click", click_handler);
-				div.className = div_class_value = "item " + (ctx.selected ? 'selected' : '') + " svelte-ziwyym";
+				div.className = div_class_value = "item " + (ctx.selected ? 'selected' : '') + " svelte-wpfhlq";
 				addLoc(div, file, 8, 8, 223);
 			},
 
@@ -12510,7 +12590,10 @@ var DronesIndustryMap = (function () {
 				appendNode(div_1, div);
 				appendNode(span, div_1);
 				appendNode(text$$1, span);
-				appendNode(text_2, div);
+				appendNode(text_1, span);
+				appendNode(text_2, span);
+				appendNode(text_3, span);
+				appendNode(text_5, div);
 				appendNode(div_2, div);
 			},
 
@@ -12519,16 +12602,20 @@ var DronesIndustryMap = (function () {
 					text$$1.data = text_value;
 				}
 
+				if ((changed.itemsWithSelection) && text_2_value !== (text_2_value = ctx.value)) {
+					text_2.data = text_2_value;
+				}
+
 				if (changed.scaleX || changed.itemsWithSelection) {
 					setStyle(div_2, "width", "" + ctx.scaleX(ctx.value) + "px");
 				}
 
-				if (changed.colorScale || changed.itemsWithSelection) {
-					setStyle(div_2, "background-color", ctx.colorScale(ctx.key));
+				if (changed.colorScale || changed.itemsWithSelection || changed.color) {
+					setStyle(div_2, "background-color", (ctx.colorScale ? ctx.colorScale(ctx.key) : ctx.color));
 				}
 
 				div._svelte.ctx = ctx;
-				if ((changed.itemsWithSelection) && div_class_value !== (div_class_value = "item " + (ctx.selected ? 'selected' : '') + " svelte-ziwyym")) {
+				if ((changed.itemsWithSelection) && div_class_value !== (div_class_value = "item " + (ctx.selected ? 'selected' : '') + " svelte-wpfhlq")) {
 					div.className = div_class_value;
 				}
 			},
@@ -12550,8 +12637,8 @@ var DronesIndustryMap = (function () {
 		return {
 			c: function create$$1() {
 				div = createElement("div");
-				div.className = "shield svelte-ziwyym";
-				addLoc(div, file, 46, 8, 1379);
+				div.className = "shield svelte-wpfhlq";
+				addLoc(div, file, 46, 8, 1410);
 			},
 
 			m: function mount(target, anchor) {
@@ -12597,6 +12684,7 @@ var DronesIndustryMap = (function () {
 
 
 		if (!('colorScale' in this._state)) console.warn("<BarChart> was created without expected data property 'colorScale'");
+		if (!('color' in this._state)) console.warn("<BarChart> was created without expected data property 'color'");
 		if (!('active' in this._state)) console.warn("<BarChart> was created without expected data property 'active'");
 		this._intro = !!options.intro;
 
@@ -15184,7 +15272,7 @@ var DronesIndustryMap = (function () {
 	            styleURL,
 	            viewport,
 	            withZoomControl,
-	            withScaleControl
+	            withScaleControl,
 	        } = this.get();
 	        const {center, zoom} = viewport;
 
@@ -15192,15 +15280,19 @@ var DronesIndustryMap = (function () {
 
 	        this.map = new mapboxgl.Map({
 	            container: this.refs.mapcontainer,
+	            center,
+	            zoom,
 	            style: styleURL,
 	            renderWorldCopies: false,
 	            pitchWithRotate: false,
 	            touchZoomRotate: false,
 	            dragRotate: false,
 	            hash: true,
-	            center,
-	            zoom
+	            attributionControl: false,
 	        })
+	        .addControl(new mapboxgl.AttributionControl({
+	            compact: true
+	        }))
 	        .on("load", () => {
 	            this.addContainer();
 	            this.updateContainerGeometry();
@@ -15224,7 +15316,8 @@ var DronesIndustryMap = (function () {
 	            new mapboxgl.NavigationControl({
 	                showCompass: false
 	            }),
-	            "bottom-right"
+	            "bottom-left"
+	            // "bottom-right"
 	        );
 	    },
 
@@ -15390,7 +15483,7 @@ var DronesIndustryMap = (function () {
 	        console.log("map:onstate", changed, current, previous);
 	    }
 
-	    if (current.viewport && !previous) {
+	    if (current.viewport && current.height > 0 && previous.height === 0) {
 	        this.createMap();
 	    }
 
@@ -17072,7 +17165,7 @@ var DronesIndustryMap = (function () {
 
 	/* src/app/App.html generated by Svelte v2.9.5 */
 
-	function barItems({$allCompanies, $allEntityTypes}) {
+	function byEntitytype({$allCompanies, $allEntityTypes}) {
 	    const keysOccourrences = lamb.reduce(
 	        $allCompanies,
 	        (acc, item) => {
@@ -17085,6 +17178,24 @@ var DronesIndustryMap = (function () {
 	            return acc;
 	        },
 	        keysToKeyedZeroes($allEntityTypes)
+	    );
+
+	    return objectToKeyValueArray(keysOccourrences);
+	}
+
+	function byTechnologyType({$allCompanies, $allTechnologyTypes}) {
+	    const keysOccourrences = lamb.reduce(
+	        $allCompanies,
+	        (acc, item) => {
+	            lamb.forEach($allTechnologyTypes, key => {
+	                if (lamb.getIn(item, key)) {
+	                    acc[key] += 1;
+	                }
+	            });
+
+	            return acc;
+	        },
+	        keysToKeyedZeroes($allTechnologyTypes)
 	    );
 
 	    return objectToKeyValueArray(keysOccourrences);
@@ -17131,7 +17242,7 @@ var DronesIndustryMap = (function () {
 
 		var if_block_creators = [
 			create_if_block$3,
-			create_if_block_1$2
+			create_if_block_2
 		];
 
 		var if_blocks = [];
@@ -17144,7 +17255,7 @@ var DronesIndustryMap = (function () {
 		current_block_type_index = select_block_type(ctx);
 		if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](component, ctx);
 
-		var if_block_1 = (ctx.withNestaFooter) && create_if_block_2(component, ctx);
+		var if_block_1 = (ctx.withNestaFooter) && create_if_block_3(component, ctx);
 
 		return {
 			c: function create$$1() {
@@ -17152,11 +17263,11 @@ var DronesIndustryMap = (function () {
 				div = createElement("div");
 				main = createElement("main");
 				if_block.c();
-				text_2 = createText("\n\n    ");
+				text_2 = createText("\n\n    \n    ");
 				if (if_block_1) if_block_1.c();
-				main.className = "svelte-1h708v5";
+				main.className = "svelte-1ab1848";
 				addLoc(main, file$b, 4, 4, 129);
-				div.className = "app svelte-1h708v5";
+				div.className = "app svelte-1ab1848";
 				addLoc(div, file$b, 3, 0, 107);
 			},
 
@@ -17195,7 +17306,7 @@ var DronesIndustryMap = (function () {
 
 				if (ctx.withNestaFooter) {
 					if (!if_block_1) {
-						if_block_1 = create_if_block_2(component, ctx);
+						if_block_1 = create_if_block_3(component, ctx);
 						if_block_1.c();
 					}
 					if_block_1.i(div, null);
@@ -17238,9 +17349,73 @@ var DronesIndustryMap = (function () {
 		};
 	}
 
+	// (34:8) {#if $isTechnologyDeveloperSelected}
+	function create_if_block_1$2(component, ctx) {
+		var current;
+
+		var barchart_initial_data = {
+		 	color: "hsla(9, 87%, 81%, 1)",
+		 	items: ctx.byTechnologyType,
+		 	selectedKeys: ctx.$technologyTypes,
+		 	title: "Technology types",
+		 	active: ctx.$areEntityTypesEditable
+		 };
+		var barchart = new BarChart({
+			root: component.root,
+			store: component.store,
+			data: barchart_initial_data
+		});
+
+		barchart.on("toggleItem", function(event$$1) {
+			component.store.fire('technologyType:toggle', event$$1.key);
+		});
+		barchart.on("deselectAllItems", function(event$$1) {
+			component.store.fire('technologyType:deselectAll');
+		});
+		barchart.on("selectAllItems", function(event$$1) {
+			component.store.fire('technologyType:selectAll');
+		});
+
+		return {
+			c: function create$$1() {
+				barchart._fragment.c();
+			},
+
+			m: function mount(target, anchor) {
+				barchart._mount(target, anchor);
+				current = true;
+			},
+
+			p: function update(changed, ctx) {
+				var barchart_changes = {};
+				if (changed.byTechnologyType) barchart_changes.items = ctx.byTechnologyType;
+				if (changed.$technologyTypes) barchart_changes.selectedKeys = ctx.$technologyTypes;
+				if (changed.$areEntityTypesEditable) barchart_changes.active = ctx.$areEntityTypesEditable;
+				barchart._set(barchart_changes);
+			},
+
+			i: function intro(target, anchor) {
+				if (current) return;
+
+				this.m(target, anchor);
+			},
+
+			o: function outro(outrocallback) {
+				if (!current) return;
+
+				barchart._fragment.o(outrocallback);
+				current = false;
+			},
+
+			d: function destroy$$1(detach) {
+				barchart.destroy(detach);
+			}
+		};
+	}
+
 	// (6:4) {#if isIterableNotEmpty($allCompanies)}
 	function create_if_block$3(component, ctx) {
-		var div, text_1, div_1, current;
+		var div, text_1, div_1, text_2, current;
 
 		var mappies_initial_data = {
 		 	accessToken: ctx.accessToken,
@@ -17267,7 +17442,7 @@ var DronesIndustryMap = (function () {
 
 		var barchart_initial_data = {
 		 	colorScale: ctx.colorScale,
-		 	items: ctx.barItems,
+		 	items: ctx.byEntitytype,
 		 	selectedKeys: ctx.$entityTypes,
 		 	title: "Entity types",
 		 	active: ctx.$areEntityTypesEditable
@@ -17288,6 +17463,8 @@ var DronesIndustryMap = (function () {
 			component.store.fire('entityType:selectAll');
 		});
 
+		var if_block = (ctx.$isTechnologyDeveloperSelected) && create_if_block_1$2(component, ctx);
+
 		return {
 			c: function create$$1() {
 				div = createElement("div");
@@ -17295,9 +17472,11 @@ var DronesIndustryMap = (function () {
 				text_1 = createText("\n    ");
 				div_1 = createElement("div");
 				barchart._fragment.c();
-				div.className = "map svelte-1h708v5";
+				text_2 = createText("\n        ");
+				if (if_block) if_block.c();
+				div.className = "map svelte-1ab1848";
 				addLoc(div, file$b, 6, 4, 184);
-				div_1.className = "barchart svelte-1h708v5";
+				div_1.className = "categories svelte-1ab1848";
 				addLoc(div_1, file$b, 22, 4, 661);
 			},
 
@@ -17307,6 +17486,8 @@ var DronesIndustryMap = (function () {
 				insertNode(text_1, target, anchor);
 				insertNode(div_1, target, anchor);
 				barchart._mount(div_1, null);
+				appendNode(text_2, div_1);
+				if (if_block) if_block.m(div_1, null);
 				current = true;
 			},
 
@@ -17325,10 +17506,26 @@ var DronesIndustryMap = (function () {
 
 				var barchart_changes = {};
 				if (changed.colorScale) barchart_changes.colorScale = ctx.colorScale;
-				if (changed.barItems) barchart_changes.items = ctx.barItems;
+				if (changed.byEntitytype) barchart_changes.items = ctx.byEntitytype;
 				if (changed.$entityTypes) barchart_changes.selectedKeys = ctx.$entityTypes;
 				if (changed.$areEntityTypesEditable) barchart_changes.active = ctx.$areEntityTypesEditable;
 				barchart._set(barchart_changes);
+
+				if (ctx.$isTechnologyDeveloperSelected) {
+					if (if_block) {
+						if_block.p(changed, ctx);
+					} else {
+						if_block = create_if_block_1$2(component, ctx);
+						if (if_block) if_block.c();
+					}
+
+					if_block.i(div_1, null);
+				} else if (if_block) {
+					if_block.o(function() {
+						if_block.d(1);
+						if_block = null;
+					});
+				}
 			},
 
 			i: function intro(target, anchor) {
@@ -17340,10 +17537,14 @@ var DronesIndustryMap = (function () {
 			o: function outro(outrocallback) {
 				if (!current) return;
 
-				outrocallback = callAfter(outrocallback, 2);
+				outrocallback = callAfter(outrocallback, 3);
 
 				mappies._fragment.o(outrocallback);
 				barchart._fragment.o(outrocallback);
+
+				if (if_block) if_block.o(outrocallback);
+				else outrocallback();
+
 				current = false;
 			},
 
@@ -17359,12 +17560,13 @@ var DronesIndustryMap = (function () {
 				}
 
 				barchart.destroy();
+				if (if_block) if_block.d();
 			}
 		};
 	}
 
-	// (35:4) {:else}
-	function create_if_block_1$2(component, ctx) {
+	// (48:4) {:else}
+	function create_if_block_2(component, ctx) {
 		var current;
 
 		var loading = new Loading({
@@ -17403,8 +17605,8 @@ var DronesIndustryMap = (function () {
 		};
 	}
 
-	// (40:4) {#if withNestaFooter}
-	function create_if_block_2(component, ctx) {
+	// (54:4) {#if withNestaFooter}
+	function create_if_block_3(component, ctx) {
 		var footer, current;
 
 		var nestafooter_initial_data = { baseURL: "https://www.nesta.org.uk" };
@@ -17418,8 +17620,8 @@ var DronesIndustryMap = (function () {
 			c: function create$$1() {
 				footer = createElement("footer");
 				nestafooter._fragment.c();
-				footer.className = "svelte-1h708v5";
-				addLoc(footer, file$b, 40, 4, 1171);
+				footer.className = "svelte-1ab1848";
+				addLoc(footer, file$b, 54, 4, 1866);
 			},
 
 			m: function mount(target, anchor) {
@@ -17455,11 +17657,12 @@ var DronesIndustryMap = (function () {
 		this._debugName = '<App>';
 		if (!options || (!options.target && !options.root)) throw new Error("'target' is a required option");
 		init(this, options);
-		this._state = assign(assign(this.store._init(["allCompanies","allEntityTypes","copy","companies","entityTypes","areEntityTypesEditable"]), data$3()), options.data);
-		this.store._add(this, ["allCompanies","allEntityTypes","copy","companies","entityTypes","areEntityTypesEditable"]);
-		this._recompute({ $allCompanies: 1, $allEntityTypes: 1 }, this._state);
+		this._state = assign(assign(this.store._init(["allCompanies","allEntityTypes","allTechnologyTypes","copy","companies","entityTypes","areEntityTypesEditable","isTechnologyDeveloperSelected","technologyTypes"]), data$3()), options.data);
+		this.store._add(this, ["allCompanies","allEntityTypes","allTechnologyTypes","copy","companies","entityTypes","areEntityTypesEditable","isTechnologyDeveloperSelected","technologyTypes"]);
+		this._recompute({ $allCompanies: 1, $allEntityTypes: 1, $allTechnologyTypes: 1 }, this._state);
 		if (!('$allCompanies' in this._state)) console.warn("<App> was created without expected data property '$allCompanies'");
 		if (!('$allEntityTypes' in this._state)) console.warn("<App> was created without expected data property '$allEntityTypes'");
+		if (!('$allTechnologyTypes' in this._state)) console.warn("<App> was created without expected data property '$allTechnologyTypes'");
 		if (!('$copy' in this._state)) console.warn("<App> was created without expected data property '$copy'");
 		if (!('withNestaFooter' in this._state)) console.warn("<App> was created without expected data property 'withNestaFooter'");
 		if (!('accessToken' in this._state)) console.warn("<App> was created without expected data property 'accessToken'");
@@ -17473,6 +17676,9 @@ var DronesIndustryMap = (function () {
 
 		if (!('$entityTypes' in this._state)) console.warn("<App> was created without expected data property '$entityTypes'");
 		if (!('$areEntityTypesEditable' in this._state)) console.warn("<App> was created without expected data property '$areEntityTypesEditable'");
+		if (!('$isTechnologyDeveloperSelected' in this._state)) console.warn("<App> was created without expected data property '$isTechnologyDeveloperSelected'");
+
+		if (!('$technologyTypes' in this._state)) console.warn("<App> was created without expected data property '$technologyTypes'");
 		this._intro = !!options.intro;
 
 		this._handlers.state = [onstate$2];
@@ -17512,13 +17718,18 @@ var DronesIndustryMap = (function () {
 	assign(App.prototype, methods$2);
 
 	App.prototype._checkReadOnly = function _checkReadOnly(newState) {
-		if ('barItems' in newState && !this._updatingReadonlyProperty) throw new Error("<App>: Cannot set read-only property 'barItems'");
+		if ('byEntitytype' in newState && !this._updatingReadonlyProperty) throw new Error("<App>: Cannot set read-only property 'byEntitytype'");
+		if ('byTechnologyType' in newState && !this._updatingReadonlyProperty) throw new Error("<App>: Cannot set read-only property 'byTechnologyType'");
 		if ('colorScale' in newState && !this._updatingReadonlyProperty) throw new Error("<App>: Cannot set read-only property 'colorScale'");
 	};
 
 	App.prototype._recompute = function _recompute(changed, state) {
 		if (changed.$allCompanies || changed.$allEntityTypes) {
-			if (this._differs(state.barItems, (state.barItems = barItems(state)))) changed.barItems = true;
+			if (this._differs(state.byEntitytype, (state.byEntitytype = byEntitytype(state)))) changed.byEntitytype = true;
+		}
+
+		if (changed.$allCompanies || changed.$allTechnologyTypes) {
+			if (this._differs(state.byTechnologyType, (state.byTechnologyType = byTechnologyType(state)))) changed.byTechnologyType = true;
 		}
 
 		if (changed.$allEntityTypes) {
@@ -17684,28 +17895,23 @@ var DronesIndustryMap = (function () {
 		}
 	});
 
-	const allEntityTypes = [
-	    "Technology Developer",
-	    "Drone-powered services",
-	    "Services to drone operators / industry",
-	    "Academic / Research Institution",
-	    "Other drone-related entitiy"
-	];
-
 	const initialState = {
 	    copy: {
 	        title: "UK Drone Industry Map",
 	        subtitle: "An interactive map showing UK drone industry technology developers, service providers and research organisations. Data provided by Glass.ai with supplemental data from Gateway to Research.",
 	        copyright: "Nesta (c) 2018",
 	    },
-	    companiesURL: "data/companies_ad_hoc.tsv",
+	    companiesURL: "data/companies_export_04.tsv",
 	    allCompanies: [],
 
-	    allEntityTypes,
 	    // don't start with empty selection at startup the map fits to companies bounds
 	    // TODO provide default bounds (UK bounds)
-	    entityTypes: allEntityTypes,
-	    areEntityTypesEditable: false
+	    entityTypes: ALL_ENTITY_TYPES,
+	    allEntityTypes: ALL_ENTITY_TYPES,
+	    areEntityTypesEditable: false,
+
+	    allTechnologyTypes: ALL_TECHNOLOGY_TYPES,
+	    technologyTypes: ALL_TECHNOLOGY_TYPES,
 	};
 
 	class DronesStore extends Store {
@@ -17713,33 +17919,42 @@ var DronesIndustryMap = (function () {
 	        super(initialState);
 
 	        this.compute(
-	            "companies",
-	            ["allCompanies", "entityTypes"],
-	            (allCompanies, entityTypes) =>
-	                filterCompaniesWithSomeEntityTypesTrue(allCompanies, entityTypes)
-	                // filterCompaniesWithAllEntityTypesTrue(allCompanies, entityTypes)
+	            "isTechnologyDeveloperSelected",
+	            ["entityTypes"],
+	            entityTypes => lamb.isIn(entityTypes, ENTITY_TYPE_TECHNOLOGY_DEVELOPER)
+	        );
+
+	        this.compute(
+	            "companies", [
+	                "allCompanies",
+	                "entityTypes",
+	                "isTechnologyDeveloperSelected",
+	                "technologyTypes"
+	            ], (
+	                allCompanies,
+	                entityTypes,
+	                isTechnologyDeveloperSelected,
+	                technologyTypes
+	            ) =>
+	                filterCompanies(
+	                    allCompanies,
+	                    entityTypes,
+	                    isTechnologyDeveloperSelected,
+	                    technologyTypes
+	                )
 	        );
 
 	        this.on("state", ({changed, current, previous}) => {
-	            // console.log("DronesStore", changed, current, previous);
+	            console.log("DronesStore", changed, current, previous);
 	        });
 
 	        this.setEvents();
 	        this.fetch();
 	    }
 
-	    async fetch () {
-	        const {companiesURL, allEntityTypes} = this.get();
-
-	        const allCompanies = await tsv$1(companiesURL, makeCompany);
-	        const debug = await tsv$1(companiesURL, makeCompany);
-
-	        this.set({allCompanies});
-
-	        this.debug();
-	    }
-
 	    setEvents () {
+	        /* entity types */
+
 	        this.on("entityType:enableEditing", entityType => {
 	            this.set({areEntityTypesEditable: true});
 	        });
@@ -17747,8 +17962,6 @@ var DronesIndustryMap = (function () {
 	        this.on("entityType:toggle", entityType => {
 	            const {entityTypes: currentEntityTypes} = this.get();
 	            const entityTypes = toggleItem(currentEntityTypes, entityType);
-
-	            console.log("entityTypes", entityTypes);
 
 	            this.set({entityTypes});
 	        });
@@ -17762,11 +17975,42 @@ var DronesIndustryMap = (function () {
 
 	            this.set({entityTypes: allEntityTypes});
 	        });
+
+	        /* technology types */
+
+	        this.on("technologyType:toggle", technologyType => {
+	            const {technologyTypes: currentTechnologyTypes} = this.get();
+	            const technologyTypes = toggleItem(currentTechnologyTypes, technologyType);
+
+	            console.log("---technologyTypes", technologyTypes);
+
+	            this.set({technologyTypes});
+	        });
+
+	        this.on("technologyType:deselectAll", () => {
+	            this.set({technologyTypes: []});
+	        });
+
+	        this.on("technologyType:selectAll", () => {
+	            const {allTechnologyTypes} = this.get();
+
+	            this.set({technologyTypes: allTechnologyTypes});
+	        });
+	    }
+
+	    async fetch () {
+	        const {companiesURL} = this.get();
+
+	        const allCompanies = await tsv$1(companiesURL, makeCompany);
+
+	        this.set({allCompanies});
+
+	        // this.debug();
 	    }
 
 	    debug () {
-	        // this.debugSameLocation();
-	        // this.debugEmptyNames();
+	        this.debugSameLocation();
+	        this.debugEmptyNames();
 	    }
 
 	    debugSameLocation () {
@@ -17809,54 +18053,6 @@ var DronesIndustryMap = (function () {
 	            console.log("-- !!! -- withEmptyName", withEmptyName);
 	        }
 	    }
-
-	    // async fetch() {
-	    //     const {companiesURL} = this.get();
-	    //
-	    //     const allCompanies = await d3.tsv(companiesURL, makeCompany);
-	    //
-	    //     // filter out those with bad latitude
-	    //     const companies = _.filter(allCompanies, _.pipe(
-	    //         _.getKey("Latitude"),
-	    //         _.not(_.anyOf(_.isLT(10), _.isNull))
-	    //     ));
-	    //
-	    //     this.set({
-	    //         allCompanies,
-	    //         companies,
-	    //     });
-	    //
-	    //     // debug
-	    //
-	    //     const diff = _.difference(allCompanies, companies);
-	    //     const buggedCompanies = _.map(diff, _.pickKeys([
-	    //         "Name", "Latitude", "Longitude"
-	    //     ]));
-	    //
-	    //     console.log("diff", diff);
-	    //     // console.log(buggedCompanies);
-	    // }
-
-	    // async fetch() {
-	    //     const {companiesURL} = this.get();
-	    //
-	    //     const allCompaniesText = await text(companiesURL, makeCompany3);
-	    //     const allCompanies = makeCompany3(makeRows(allCompaniesText));
-	    //
-	    //     // filter out those with bad latitude
-	    //     const companies = _.filter(allCompanies, _.pipe(
-	    //         _.getKey("Latitude"),
-	    //         _.not(_.anyOf(_.isLT(10), _.isNull))
-	    //     ));
-	    //     const propGroups = await d3.json(propGroupsURL);
-	    //
-	    //     this.set({
-	    //         companies,
-	    //         propGroups
-	    //     });
-	    //
-	    //     console.log(_.keys(companies[0]).length);
-	    // }
 	}
 
 	const store = new DronesStore();
@@ -17865,9 +18061,10 @@ var DronesIndustryMap = (function () {
 	    target: document.body,
 	    store,
 	    data: {
-	        // withNestaFooter: true,
-	        mapWithScaleControl: true,
+	        mapWithScaleControl: false,
 	        mapWithZoomControl: true,
+	        // withNestaFooter: true,
+	        withNestaFooter: false,
 	    }
 	});
 
