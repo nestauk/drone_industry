@@ -11995,14 +11995,12 @@ var DronesIndustryMap = (function () {
 	    "Subsystems",
 	    "Navigation & autonomy",
 	    "Drone-data processing",
-	    "Security",
-	    "System integration / consultancy",
-	    "Other drone-related technologies",
+	    "Systems integration / consultancy",
 	    "Delivery drones",
 	    "People carrying drones",
-	    "Counter-drone"
+	    "Counter-drone",
+	    "Other drone-related technologies"
 	];
-
 
 	/* CSV */
 
@@ -12018,10 +12016,6 @@ var DronesIndustryMap = (function () {
 	    // Organisation details
 	    "Name": lamb.identity,
 	    "Project / product name": lamb.identity,
-	    // "Type (Large Co, SME, Academic, Research and Technology Organisation)": _.identity,
-	    // "Global HQ Inc Postcode where possible. ": _.identity,
-	    // "Postcode (extra)": _.identity,
-	    // "UK postcode": _.identity,
 	    "Link": lamb.identity,
 	    "Latitude": processCoordValue,
 	    "Longitude": processCoordValue,
@@ -12040,12 +12034,11 @@ var DronesIndustryMap = (function () {
 	    "Subsystems": Boolean,
 	    "Navigation & autonomy": Boolean,
 	    "Drone-data processing": Boolean,
-	    "Security": Boolean,
-	    "System integration / consultancy": Boolean,
-	    "Other drone-related technologies": Boolean,
+	    "Systems integration / consultancy": Boolean,
 	    "Delivery drones": Boolean,
 	    "People carrying drones": Boolean,
-	    "Counter-drone": Boolean
+	    "Counter-drone": Boolean,
+	    "Other drone-related technologies": Boolean
 	});
 
 	/* property getters */
@@ -12351,7 +12344,7 @@ var DronesIndustryMap = (function () {
 	    this.setGeometry();
 	}
 	function onstate({changed, current, previous}) {
-	    console.log("Barchart:onstate", changed, current, previous);
+	    // console.log("Barchart:onstate", changed, current, previous);
 	}
 	const file = "src/app/components/BarChart.html";
 
@@ -12748,9 +12741,9 @@ var DronesIndustryMap = (function () {
 				div = createElement("div");
 				p = createElement("p");
 				text = createText("Loading...");
-				p.className = "svelte-924mvw";
+				p.className = "svelte-fw6rqx";
 				addLoc(p, file$1, 1, 4, 26);
-				div.className = "loading svelte-924mvw";
+				div.className = "loading svelte-fw6rqx";
 				addLoc(div, file$1, 0, 0, 0);
 			},
 
@@ -15479,9 +15472,7 @@ var DronesIndustryMap = (function () {
 	    this.setGeometry();
 	}
 	function onstate$1({changed, current, previous}) {
-	    if (!changed.zoom) {
-	        console.log("map:onstate", changed, current, previous);
-	    }
+	    if (!changed.zoom) ;
 
 	    if (current.viewport && current.height > 0 && previous.height === 0) {
 	        this.createMap();
@@ -17228,10 +17219,10 @@ var DronesIndustryMap = (function () {
 	};
 
 	function oncreate$2() {
-	    console.log("app:oncreate", this.get());
+	    // console.log("app:oncreate", this.get());
 	}
 	function onstate$2({changed, current, previous}) {
-	    console.log("app:onstate", changed, current, previous);
+	    // console.log("app:onstate", changed, current, previous);
 	}
 	const file$b = "src/app/App.html";
 
@@ -17263,11 +17254,11 @@ var DronesIndustryMap = (function () {
 				div = createElement("div");
 				main = createElement("main");
 				if_block.c();
-				text_2 = createText("\n\n    \n    ");
+				text_2 = createText("\n\n    ");
 				if (if_block_1) if_block_1.c();
-				main.className = "svelte-1ab1848";
+				main.className = "svelte-14ih0go";
 				addLoc(main, file$b, 4, 4, 129);
-				div.className = "app svelte-1ab1848";
+				div.className = "app svelte-14ih0go";
 				addLoc(div, file$b, 3, 0, 107);
 			},
 
@@ -17474,9 +17465,9 @@ var DronesIndustryMap = (function () {
 				barchart._fragment.c();
 				text_2 = createText("\n        ");
 				if (if_block) if_block.c();
-				div.className = "map svelte-1ab1848";
+				div.className = "map svelte-14ih0go";
 				addLoc(div, file$b, 6, 4, 184);
-				div_1.className = "categories svelte-1ab1848";
+				div_1.className = "categories svelte-14ih0go";
 				addLoc(div_1, file$b, 22, 4, 661);
 			},
 
@@ -17605,7 +17596,7 @@ var DronesIndustryMap = (function () {
 		};
 	}
 
-	// (54:4) {#if withNestaFooter}
+	// (53:4) {#if withNestaFooter}
 	function create_if_block_3(component, ctx) {
 		var footer, current;
 
@@ -17620,8 +17611,8 @@ var DronesIndustryMap = (function () {
 			c: function create$$1() {
 				footer = createElement("footer");
 				nestafooter._fragment.c();
-				footer.className = "svelte-1ab1848";
-				addLoc(footer, file$b, 54, 4, 1866);
+				footer.className = "svelte-14ih0go";
+				addLoc(footer, file$b, 53, 4, 1769);
 			},
 
 			m: function mount(target, anchor) {
@@ -17967,13 +17958,21 @@ var DronesIndustryMap = (function () {
 	        });
 
 	        this.on("entityType:deselectAll", () => {
-	            this.set({entityTypes: []});
+	            const {allTechnologyTypes} = this.get();
+	            
+	            this.set({
+	                entityTypes: [],
+	                technologyTypes: allTechnologyTypes
+	            });
 	        });
 
 	        this.on("entityType:selectAll", () => {
-	            const {allEntityTypes} = this.get();
+	            const {allEntityTypes, allTechnologyTypes} = this.get();
 
-	            this.set({entityTypes: allEntityTypes});
+	            this.set({
+	                entityTypes: allEntityTypes,
+	                technologyTypes: allTechnologyTypes
+	            });
 	        });
 
 	        /* technology types */
@@ -17981,8 +17980,6 @@ var DronesIndustryMap = (function () {
 	        this.on("technologyType:toggle", technologyType => {
 	            const {technologyTypes: currentTechnologyTypes} = this.get();
 	            const technologyTypes = toggleItem(currentTechnologyTypes, technologyType);
-
-	            console.log("---technologyTypes", technologyTypes);
 
 	            this.set({technologyTypes});
 	        });
@@ -18007,6 +18004,12 @@ var DronesIndustryMap = (function () {
 
 	        // this.debug();
 	    }
+
+	    // selectAllTechnologyTypes () {
+	    //     const {allTechnologyTypes} = this.get();
+	    //
+	    //     this.set({technologyTypes: allTechnologyTypes});
+	    // }
 
 	    debug () {
 	        this.debugSameLocation();
@@ -18063,7 +18066,6 @@ var DronesIndustryMap = (function () {
 	    data: {
 	        mapWithScaleControl: false,
 	        mapWithZoomControl: true,
-	        // withNestaFooter: true,
 	        withNestaFooter: false,
 	    }
 	});
