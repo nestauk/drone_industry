@@ -1,0 +1,8 @@
+build
+node_modules
+package-lock.json
+.git
+.publish
+
+/* mac */
+.DS_Store

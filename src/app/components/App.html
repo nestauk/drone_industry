@@ -1,0 +1,240 @@
+<svelte:head>
+    <title>{$copy.title} ({withNestaFooter ? "fullscreen" : "embed"})</title>
+    <link rel="stylesheet" type="text/css" href="../css/main.b449f74b658d.css">
+    <link rel="stylesheet" type="text/css" href="../css/ionicons.min.css">
+</svelte:head>
+<div class="app">
+    <header>
+        <Header
+            {activeAbout}
+            {isMenuOpen}
+            on:togglemenu="set({isMenuOpen: !isMenuOpen})"
+            on:about="toggleAbout(event.id)"
+        />
+    </header>
+    <main>
+    {#if isIterableNotEmpty($allCompanies)}
+    <div class="map">
+        <MapPies
+            {accessToken}
+            {colorScale}
+            {getLngLat}
+            getItemID={getID}
+            items={$companies}
+            keys={$allEntityTypes}
+            radiusMax=18
+            radiusMin=0.25
+            {styleURL}
+            withScaleControl={mapWithScaleControl}
+            withZoomControl={mapWithZoomControl}
+            on:enableItemsEditing="$fire('entityType:enableEditing')"
+        />
+    </div>
+    {#if isMenuOpen}
+    <div class="categories">
+        <BarChart
+            {colorScale}
+            items={byEntitytype}
+            on:toggleItem="$fire('entityType:toggle', event.key)"
+            on:deselectAllItems="$fire('entityType:deselectAll')"
+            on:selectAllItems="$fire('entityType:selectAll')"
+            selectedKeys={$entityTypes}
+            title="Entity types"
+            active={$areEntityTypesEditable}
+        />
+        {#if $isTechnologyDeveloperSelected}
+        <BarChart
+            color="hsla(9, 87%, 81%, 1)"
+            items={byTechnologyType}
+            on:toggleItem="$fire('technologyType:toggle', event.key)"
+            on:deselectAllItems="$fire('technologyType:deselectAll')"
+            on:selectAllItems="$fire('technologyType:selectAll')"
+            selectedKeys={$technologyTypes}
+            title="Technology types"
+            active={$areEntityTypesEditable}
+        />
+        {/if}
+    </div>
+    {/if}
+    {:else}
+    <Loading />
+    {/if}
+    <div class="about">
+        <div class="content">
+            <About content={activeAbout}/>
+        </div>
+    </div>
+    </main>
+
+    {#if withNestaFooter}
+    <footer>
+        <NestaFooter baseURL="https://www.nesta.org.uk"/>
+    </footer>
+    {/if}
+</div>
+
+<script>
+    import _ from "lamb";
+
+    import * as d3 from "@vendor/d3";
+
+    import {makeOccurrencesKeyValueArray} from "@utils/arrayUtils";
+    import {getID, getLngLat} from "@utils/companies";
+    import {isIterableNotEmpty} from "@utils/iterableUtils";
+    import {objectToKeyValueArray} from "@utils/objUtils";
+
+    import {
+        MAPBOXGL_ACCESSTOKEN,
+        MAPBOXGL_STYLEURL,
+    } from "../consts";
+
+    export default {
+        data () {
+            return {
+                accessToken: MAPBOXGL_ACCESSTOKEN,
+                styleURL: MAPBOXGL_STYLEURL,
+                getLngLat,
+                getID,
+                isMenuOpen: true,
+                activeAbout: null
+            }
+        },
+        computed: {
+            byEntitytype: ({$allCompanies, $allEntityTypes}) =>
+                makeOccurrencesKeyValueArray($allCompanies, $allEntityTypes),
+
+            byTechnologyType: ({$allCompanies, $allTechnologyTypes}) =>
+                makeOccurrencesKeyValueArray($allCompanies, $allTechnologyTypes),
+
+            colorScale: ({$allEntityTypes}) =>
+                d3.scaleOrdinal()
+                .domain($allEntityTypes)
+                .range([
+                    "#F15235", // red
+                    "#0FC3A8", // teal
+                    "#FAD677", // yellow
+                    "#032B2F", // dark blue
+                    "rgb(152, 78, 163)" // purple
+                ])
+                // .range(d3.schemeSet1)
+        },
+
+        components: {
+            About: "./About/About.html",
+            BarChart: "./BarChart.html",
+            Header: "./Header.html",
+            Loading: "./Loading.html",
+            MapPies: "./MapPies/MapPies.html",
+            NestaFooter: "./NestaFooter/NestaFooter.html",
+        },
+
+        onstate ({changed, current, previous}) {
+            console.log("app:onstate", changed, current, previous);
+        },
+        oncreate () {
+            // console.log("app:oncreate", this.get());
+        },
+
+        methods: {
+            toggleAbout (id) {
+                const {activeAbout} = this.get();
+
+                if (activeAbout === id) {
+                    this.set({activeAbout: null});
+                } else {
+                    this.set({activeAbout: id});
+                }
+            }
+        },
+
+        helpers: {
+            isIterableNotEmpty
+        }
+    }
+</script>
+
+<style>
+    .app {
+        width: 100%;
+        height: 100%;
+
+        display: flex;
+        flex-direction: column;
+
+        overflow: hidden;
+    }
+
+    header {
+        flex: 0 0 50px;
+        /* max-height: 180px; */
+    }
+
+    main {
+        flex: 1;
+        width: 100%;
+
+        position: relative; /* .categories */
+        /* overflow: hidden; */
+    }
+
+    .map {
+        width: 100%;
+        height: 100%;
+    }
+
+    footer {
+        /* 176 + 3 px (border), also good for mobile so we have some room
+        for dragging up but the footer won't take the whole screen */
+        flex: 0 0 180px;
+
+        /* before the css gets applis the footer is too high and the map
+        loads and renders when it's too short */
+        max-height: 180px;
+    }
+
+    .categories {
+        position: absolute;
+        top: 0;
+        right: 0;
+
+        /* x: move the scroolbar out of the window */
+
+        width: calc(350px + 50px + 1em);
+        max-width: calc(100% + 50px + 1em - 2em);
+        padding-right: calc(50px + 1em);
+        margin-right: -50px;
+
+        /* y */
+
+        margin-top: 1em;
+        max-height: calc(100% - 1em); /* - margin-top */
+        overflow-y: scroll;
+    }
+
+    .about {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+    }
+
+    .about .content {
+        width: 350px;
+        max-width: calc(100% - 2em);
+        max-height: calc(100% - 2em);
+        user-select: none;
+
+        background-color: white;
+        box-shadow: 5px 5px 5px #c1c1c1;
+
+        pointer-events: auto;
+        overflow-y: auto;
+
+        font-size: 0.85em;
+    }
+</style>
