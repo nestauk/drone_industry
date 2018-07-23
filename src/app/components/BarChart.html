@@ -35,14 +35,6 @@
                 />
             </div>
         </div>
-        <!-- <div class="group">
-            <div class="control">
-                <input type="button"
-                    value={isOpen ? "Close" : "Open"}
-                    on:click="toggle()"
-                />
-            </div>
-        </div> -->
     </div>
     {#if !active}
         <div class="shield"></div>
@@ -168,10 +160,10 @@
     .label {
         display: flex;
         align-items: flex-end;
-        user-select: none;
     }
     .label span {
         line-height: 2em;
+        user-select: none;
     }
     .label span:nth-child(2) {
         margin-left: 0.25em;
