@@ -27,7 +27,7 @@ const makeBuildConfig = (appConfig, isProduction) => {
         : makeBuildSubpath("embedded");
 
     console.log("isProduction", isProduction);
-    
+
     return {
         bundleOpts: {
             input: "src/app/main.js",
@@ -65,7 +65,7 @@ const makeBuildConfig = (appConfig, isProduction) => {
                 //         "node_modules/svelte/shared.js"
                 //     ]
                 // }),
-                // isProduction && terser()
+                isProduction && terser()
             ]
         },
         outputOpts: {
