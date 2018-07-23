@@ -1,22 +1,18 @@
 <div class="footer-links">
     <div class="footer-links__container">
-        <div class="footer-link-item">
-            <a class="footer-link-item__link" href="{baseURL}/press/">Press</a>
-        </div>
-        <div class="footer-link-item">
-            <a class="footer-link-item__link" href="{baseURL}/jobs/">Jobs</a>
-        </div>
-        <div class="footer-link-item">
-            <a class="footer-link-item__link" href="{baseURL}/privacy/">Privacy</a>
-        </div>
-        <div class="footer-link-item">
-            <a class="footer-link-item__link" href="{baseURL}/cookies/">Cookies</a>
-        </div>
-        <div class="footer-link-item">
-            <a class="footer-link-item__link" href="{baseURL}/terms-use/">Terms of use</a>
-        </div>
-        <div class="footer-link-item">
-            <a class="footer-link-item__link" href="{baseURL}/contact-us/">Contact us</a>
-        </div>
+        <FooterLink url="{baseURL}/press/">Press</FooterLink>
+        <FooterLink url="{baseURL}/jobs/">Jobs</FooterLink>
+        <FooterLink url="{baseURL}/privacy/">Privacy</FooterLink>
+        <FooterLink url="{baseURL}/cookies/">Cookies</FooterLink>
+        <FooterLink url="{baseURL}/terms-use/">Terms of use</FooterLink>
+        <FooterLink url="{baseURL}/contact-us/">Contact us</FooterLink>
     </div>
 </div>
+
+<script>
+    export default {
+        components: {
+            FooterLink: "./FooterLink.html"
+        }
+    }
+</script>
