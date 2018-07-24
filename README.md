@@ -12,6 +12,11 @@ Hover over the dots to see the company name and click to open their website in a
 
 To zoom use the +/- buttons, double click, or shift drag to select an area.
 
+### Source code
+
+This map is published as open source on [Github](https://github.com/nestauk/drone_industry/tree/pre-release-1).
+
+
 ### Map
 
 [Here](https://nestauk.github.io/drone_industry/embedded) you can navigate the map.

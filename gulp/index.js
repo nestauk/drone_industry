@@ -1,5 +1,6 @@
 import "./env";
 import "./assets";
+import "./readme";
 import "./data";
 import "./html";
 import "./mapbox";
