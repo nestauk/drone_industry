@@ -2,6 +2,7 @@ import gulp from "gulp";
 
 import {makeBuildSubpath} from "./index";
 import {browserSync} from "./serve";
+import options from "./options";
 
 const INDEX_HTML_PATH = "src/app/index.html";
 
@@ -19,11 +20,13 @@ gulp.task("copy.html.fullscreen", done => {
     done();
 });
 
+gulp.task("copy.html", options.fullscreen
+    ? gulp.parallel("copy.html.embedded", "copy.html.fullscreen")
+    : gulp.task("copy.html.embedded")
+);
+
 gulp.task("watch.html", done => {
-    gulp.watch(INDEX_HTML_PATH, gulp.series(
-        "copy.html.embedded",
-        "copy.html.fullscreen",
-    ));
+    gulp.watch(INDEX_HTML_PATH, gulp.task("copy.html"));
 
     done();
 });

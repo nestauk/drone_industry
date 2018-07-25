@@ -4,11 +4,12 @@
   "author": "Luca Bonavita - nesta.org.uk",
   "version": "0.0.1",
   "scripts": {
-    "devbuild": "gulp envbuild",
-    "prodbuild": "gulp envbuild -p",
-    "dev": "gulp",
-    "prod": "gulp -p",
-    "deploy": "gulp deploy"
+    "nb": "rm -rf build && mkdir build",
+    "devbuild": "npm run nb && gulp build --fullscreen",
+    "prodbuild": "npm run nb && gulp build --fullscreen --production",
+    "dev": "npm run nb && gulp",
+    "prod": "npm run nb && gulp --production",
+    "deploy": "npm run nb && gulp deploy --fullscreen --production"
   },
   "license": "MIT",
   "dependencies": {
@@ -29,9 +30,8 @@
     "babel-preset-env": "^1.7.0",
     "babel-register": "^6.26.0",
     "browser-sync": "^2.24.6",
+    "gh-pages": "^1.2.0",
     "gulp": "^4.0.0",
-    "gulp-env": "^0.4.0",
-    "gulp-gh-pages": "^0.5.4",
     "minimist": "^1.2.0",
     "rollup": "^0.63.2",
     "rollup-plugin-alias": "^1.4.0",
@@ -41,7 +41,6 @@
     "rollup-plugin-replace": "^2.0.0",
     "rollup-plugin-svelte": "^4.0.0",
     "rollup-plugin-terser": "^1.0.1",
-    "rollup-plugin-uglify": "^4.0.0",
     "svelte": "^2.6.0"
   }
 }

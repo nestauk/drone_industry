@@ -7,26 +7,24 @@ import svelte from "rollup-plugin-svelte";
 import replace from "rollup-plugin-replace";
 import resolve from "rollup-plugin-node-resolve";
 import commonjs from "rollup-plugin-commonjs";
-// import buble from "rollup-plugin-buble";
-// import {uglify} from "rollup-plugin-uglify";
+import buble from "rollup-plugin-buble";
 import {terser} from "rollup-plugin-terser";
 
 import pkg from "../package.json";
+
+import {makeResolveAliases} from "../src/utils/buildUtils";
+
 import {makeBuildSubpath} from "./index";
 import options from "./options";
 
-const {makeResolveAliases} = require("../src/utils/buildUtils");
-
 const resolveAliases = makeResolveAliases(path.resolve(__dirname, "../"));
 
-const makeBuildConfig = (appConfig, isProduction) => {
+const makeBuildConfig = (appConfig, isProductionBuild) => {
     const {withNestaFooter} = appConfig;
 
     const buildPath = withNestaFooter
         ? makeBuildSubpath("fullscreen")
         : makeBuildSubpath("embedded");
-
-    console.log("isProduction", isProduction);
 
     return {
         bundleOpts: {
@@ -46,33 +44,31 @@ const makeBuildConfig = (appConfig, isProduction) => {
                     // opt in to v3 behaviour today
                     skipIntroByDefault: true,
                     nestedTransitions: true,
-                    dev: !isProduction,
+                    dev: !isProductionBuild,
 
-                    // we"ll extract any component CSS out into
-                    // a separate file — better for performance
+                    // bundle all components CSS into a single file
                     css: css => {
-                        css.write(`${buildPath}/bundle.css`);
+                        css.write(`${buildPath}/bundle.css`, !isProductionBuild);
                     }
                 }),
 
                 resolve(),
                 commonjs(),
 
-                // isProduction && buble({
-                // buble({
+                // isProductionBuild && buble({
                 //     include: [
                 //         "src/**",
                 //         "node_modules/svelte/shared.js"
                 //     ]
                 // }),
-                isProduction && terser()
+                isProductionBuild && terser()
             ]
         },
         outputOpts: {
             file: `${buildPath}/bundle.js`,
             format: "iife",
             name: pkg.name,
-            sourcemap: true,
+            sourcemap: !isProductionBuild,
         }
     }
 }
@@ -80,7 +76,7 @@ const makeBuildConfig = (appConfig, isProduction) => {
 gulp.task("rollup.fullscreen", async function (done) {
     const {bundleOpts, outputOpts} = makeBuildConfig(
         {withNestaFooter: true},
-        process.env.PRODUCTION_BUILD
+        options.production
     );
 
     const bundle = await rollup(bundleOpts);
@@ -92,7 +88,7 @@ gulp.task("rollup.fullscreen", async function (done) {
 gulp.task("rollup.embedded", async function (done) {
     const {bundleOpts, outputOpts} = makeBuildConfig(
         {withNestaFooter: false},
-        process.env.PRODUCTION_BUILD
+        options.production
     );
 
     const bundle = await rollup(bundleOpts);
@@ -101,22 +97,10 @@ gulp.task("rollup.embedded", async function (done) {
     done();
 });
 
-gulp.task("rollup", gulp.parallel(
-    "rollup.embedded",
-    "rollup.fullscreen"
-));
-
-// gulp.task("rollup", () => {
-//     const rollups = ["rollup.embedded"];
-//     if (options.f) {
-//         _.appendTo(rollups, "rollup.fullscreen")
-//     };
-//
-//     console.log(rollups);
-//
-//     gulp.parallel(...rollups);
-//     done();
-// });
+gulp.task("rollup", options.fullscreen
+    ? gulp.parallel("rollup.embedded", "rollup.fullscreen")
+    : gulp.task("rollup.embedded")
+);
 
 gulp.task("watch.src", done => {
     gulp.watch("src/**/*", gulp.series("rollup"));

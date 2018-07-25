@@ -2,7 +2,7 @@ build
 node_modules
 package-lock.json
 .git
-.publish
+.gh-pages
 
 /* mac */
 .DS_Store

@@ -1,12 +1,26 @@
 import parseArgs from "minimist";
 
-export default parseArgs(process.argv.slice(2), {
+/*
+npm run dev -- --option1 --option2
+npm run deploy -- -m "deploy message"
+*/
+
+const options = parseArgs(process.argv.slice(2), {
+    string: [
+        "m", // npm run deploy -- -m "deploy message"
+    ],
     boolean: [
-        // "f", // with footer?
-        "p", // production build?
+        "fullscreen", // build
+        "production", // build
+        "push", // deploy
     ],
     default: {
-        // f: false,
-        p: false,
+        fullscreen: false,
+        production: false,
+        push: false
     }
 });
+
+console.log("options", options);
+
+export default options;

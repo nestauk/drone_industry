@@ -1,7 +1,7 @@
 import gulp from "gulp";
 
 gulp.task("default", gulp.series(
-    "envbuild",
+    "build",
     "serve",
     gulp.parallel(
         "watch.assets",
