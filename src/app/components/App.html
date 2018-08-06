@@ -157,21 +157,17 @@
     .app {
         width: 100%;
         height: 100%;
-
-        display: flex;
-        flex-direction: column;
-
-        overflow: hidden;
+        overflow-x: hidden;
     }
 
     header {
-        flex: 0 0 50px;
-        /* max-height: 180px; */
+        width: 100%;
+        height: 50px;
     }
 
     main {
-        flex: 1;
         width: 100%;
+        height: calc(100% - 50px); /* header height */
 
         position: relative; /* .categories */
         /* overflow: hidden; */
@@ -183,13 +179,7 @@
     }
 
     footer {
-        /* 176 + 3 px (border), also good for mobile so we have some room
-        for dragging up but the footer won't take the whole screen */
-        flex: 0 0 180px;
-
-        /* before the css gets applis the footer is too high and the map
-        loads and renders when it's too short */
-        max-height: 180px;
+        width: 100%;
     }
 
     .categories {
@@ -199,15 +189,17 @@
 
         /* x: move the scroolbar out of the window */
 
-        width: calc(350px + 50px + 1em);
-        max-width: calc(100% + 50px + 1em - 2em);
-        padding-right: calc(50px + 1em);
+        width: calc(350px + 50px + 0.5em);
+        padding-right: calc(50px + 0.5em);
         margin-right: -50px;
+
+        /* thin screens - (mobile) */
+        max-width: calc(100% - 0.5em + 50px);
 
         /* y */
 
         margin-top: 1em;
-        max-height: calc(100% - 1em); /* - margin-top */
+        max-height: calc(100% - 0.5em); /* margin-top */
         overflow-y: scroll;
     }
 
