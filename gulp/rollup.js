@@ -31,9 +31,13 @@ const makeBuildConfig = (appConfig, isProductionBuild) => {
             input: "src/app/main.js",
             plugins: [
                 replace({
-                    include: "src/app/main.js",
+                    include: [
+                        "src/app/main.js",
+                        "src/app/components/App.html",
+                    ],
                     values: {
-                        WITH_NESTA_FOOTER: withNestaFooter
+                        WITH_NESTA_FOOTER: withNestaFooter,
+                        APP_OVERFLOW_Y: withNestaFooter ? "auto" : "hidden"
                     }
                 }),
                 alias(resolveAliases({
