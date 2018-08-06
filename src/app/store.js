@@ -73,9 +73,9 @@ class DronesStore extends Store {
                 )
         );
 
-        this.on("state", ({changed, current, previous}) => {
-            console.log("DronesStore", changed, current, previous);
-        });
+        // this.on("state", ({changed, current, previous}) => {
+        //     console.log("DronesStore", changed, current, previous);
+        // });
 
         this.setEvents();
         this.fetch();
@@ -142,12 +142,6 @@ class DronesStore extends Store {
 
         // this.debug();
     }
-
-    // selectAllTechnologyTypes () {
-    //     const {allTechnologyTypes} = this.get();
-    //
-    //     this.set({technologyTypes: allTechnologyTypes});
-    // }
 
     debug () {
         this.debugSameLocation();
