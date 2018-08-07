@@ -1,14 +1,27 @@
 <svelte:head>
     <link rel="stylesheet" type="text/css" href="../css/mapbox-gl.css">
 </svelte:head>
-<svelte:window on:resize="setGeometry()" />
-<div ref:layers>
+<svelte:window
+    on:resize="setGeometry()"
+    on:keyup="onkeyup(event)"
+    on:keydown="onkeydown(event)"
+/>
+<div ref:layers
+    on:mouseenter="onmouseenter()"
+    on:mouseleave="onmouseleave()"
+    on:wheel="onwheel(event)"
+>
     <div ref:mapcontainer></div>
     {#if infopanel}
     <div ref:infopanel style={infopanel.style}>
         {infopanel.Name}
     </div>
     {/if}
+    <Scrollshield
+        isVisible="{isScrollshieldVisible}"
+        keyToEnableScroll="{keyToEnableScroll}"
+        on:animationDone="hideScrollShield()"
+    />
 </div>
 
 <script>
@@ -23,16 +36,14 @@
         FIT_PADDING,
         MAPBOXGL_MAX_ZOOM,
         MAPBOXGL_MIN_ZOOM,
-        MAPBOXGL_TILE_SIZE
+        MAPBOXGL_TILE_SIZE,
+        KEY_TO_ENABLE_SCROLL,
+        KEY_TO_ENABLE_SCROLL_EVENTS
     } from "./consts";
     import {getElementGeometry, makeStyle} from "@utils/domUtils";
     import {tap} from "@utils/debugUtils";
     import {sanitizeURLProtocol} from "@utils/urlUtils";
-    import {
-        // emptyFeatureCollection,
-        // getCenterCoord,
-        toGeoPoints
-    } from "@utils/geoUtils";
+    import {toGeoPoints} from "@utils/geoUtils";
 
     const getSanitizedLink = _.pipe(
         _.getKey("Link"),
@@ -45,7 +56,12 @@
         .value(_.getKey("value"));
 
     export default {
-        // state
+        components: {
+            Scrollshield: "./Scrollshield.html"
+        },
+
+        /* state */
+
         data () {
             return {
                 width: 0,
@@ -53,6 +69,9 @@
                 zoom: MAPBOXGL_MIN_ZOOM,
                 infopanel: null,
                 infopanelMargin: 5,
+                isScrollshieldVisible: false,
+                isPointerOverMap: false,
+                keyToEnableScroll: KEY_TO_ENABLE_SCROLL
             }
         },
         computed: {
@@ -93,13 +112,9 @@
             ),
         },
 
-        // lifecycle
+        /* lifecycle */
 
         onstate ({changed, current, previous}) {
-            if (!changed.zoom) {
-                // console.log("map:onstate", changed, current, previous);
-            }
-
             if (current.viewport && current.height > 0 && previous.height === 0) {
                 this.createMap();
             }
@@ -121,6 +136,8 @@
         oncreate () {
             this.setGeometry();
         },
+
+        /* methods */
 
         methods: {
             setGeometry () {
@@ -149,6 +166,7 @@
                     renderWorldCopies: false,
                     pitchWithRotate: false,
                     touchZoomRotate: false,
+                    keyboard: false,
                     scrollZoom: false,
                     dragRotate: false,
                     // hash: true,
@@ -186,7 +204,6 @@
                         showCompass: false
                     }),
                     "bottom-left"
-                    // "bottom-right"
                 );
             },
 
@@ -341,8 +358,62 @@
 
             enableItemsEditing () {
                 this.fire("enableItemsEditing");
-            }
+            },
+
+            // scrollshield
+
+            showScrollShield () {
+                this.set({isScrollshieldVisible: true});
+            },
+            hideScrollShield () {
+                this.set({isScrollshieldVisible: false});
+            },
+
+            // scrollZoom
+
+            enableScrollToZoom (event) {
+                this.map.scrollZoom.enable();
+            },
+            disableScrollToZoom (event) {
+                this.map.scrollZoom.disable();
+            },
+
+            // events: keys
+
+            onkeydown (event) {
+                const {keyToEnableScroll, isPointerOverMap} = this.get();
+
+                if (isPointerOverMap && event.key === keyToEnableScroll) {
+                    this.enableScrollToZoom();
+                    this.hideScrollShield();
+                }
+            },
+            onkeyup (event) {
+                const {keyToEnableScroll, isPointerOverMap} = this.get();
+
+                if (isPointerOverMap && event.key === keyToEnableScroll) {
+                    this.disableScrollToZoom();
+                }
+            },
+
+            // events: pointer
+
+            onmouseenter (event) {
+                this.set({isPointerOverMap: true});
+                this.showScrollShield();
+            },
+            onmouseleave (event) {
+                this.set({isPointerOverMap: false});
+                this.disableScrollToZoom();
+                this.hideScrollShield();
+            },
+            onwheel (event) {
+                if (!event[KEY_TO_ENABLE_SCROLL_EVENTS]) {
+                    this.showScrollShield();
+                }
+            },
         },
+        
         helpers: {
             getSanitizedLink
         }
