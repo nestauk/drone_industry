@@ -66,7 +66,8 @@ const makeBuildConfig = (appConfig, isProductionBuild) => {
                 //     ]
                 // }),
                 isProductionBuild && terser()
-            ]
+            ],
+            cache: true
         },
         outputOpts: {
             file: `${buildPath}/bundle.js`,

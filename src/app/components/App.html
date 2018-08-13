@@ -18,6 +18,7 @@
         <MapPies
             {accessToken}
             {colorScale}
+            {getLink}
             {getLngLat}
             getItemID={getID}
             items={$companies}
@@ -79,16 +80,26 @@
     import * as d3 from "@vendor/d3";
 
     import {makeOccurrencesKeyValueArray} from "@utils/arrayUtils";
-    import {getID, getLngLat} from "@utils/companies";
+    import {getID, getLink, getLngLat} from "@utils/companies";
+    import {preventPinchDefault, preventDoubleClickDefault} from "@utils/eventUtils";
     import {isIterableNotEmpty} from "@utils/iterableUtils";
     import {objectToKeyValueArray} from "@utils/objUtils";
 
-    import {
-        MAPBOXGL_ACCESSTOKEN,
-        MAPBOXGL_STYLEURL,
-    } from "../consts";
+    import {MAPBOXGL_ACCESSTOKEN, MAPBOXGL_STYLEURL} from "../consts";
 
     export default {
+        components: {
+            About: "./About/About.html",
+            BarChart: "./BarChart.html",
+            Header: "./Header.html",
+            Loading: "./Loading.html",
+            MapPies: "./MapPies/MapPies.html",
+            NestaFooter: "./NestaFooter/NestaFooter.html",
+            // Window: "./Window.html",
+        },
+
+        // state
+
         data () {
             return {
                 accessToken: MAPBOXGL_ACCESSTOKEN,
@@ -116,24 +127,7 @@
                     "#032B2F", // dark blue
                     "rgb(152, 78, 163)" // purple
                 ])
-                // .range(d3.schemeSet1)
         },
-
-        components: {
-            About: "./About/About.html",
-            BarChart: "./BarChart.html",
-            Header: "./Header.html",
-            Loading: "./Loading.html",
-            MapPies: "./MapPies/MapPies.html",
-            NestaFooter: "./NestaFooter/NestaFooter.html",
-        },
-
-        // onstate ({changed, current, previous}) {
-        //     console.log("app:onstate", changed, current, previous);
-        // },
-        // oncreate () {
-        //     console.log("app:oncreate", this.get());
-        // },
 
         methods: {
             toggleAbout (id) {
@@ -145,7 +139,7 @@
                     this.set({activeAbout: id});
                 }
             }
-        },
+        }
 
         helpers: {
             isIterableNotEmpty

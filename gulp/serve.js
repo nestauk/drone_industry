@@ -8,8 +8,7 @@ gulp.task("serve", done => {
         server: {
             baseDir: "./build",
         },
-        // https: true,
-        port: 7000,
+        port: 3000,
         open: false,
         reloadOnRestart: true,
         notify: false,

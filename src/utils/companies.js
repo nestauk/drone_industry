@@ -5,6 +5,7 @@ import {isIterableNotEmpty} from "./iterableUtils";
 import {applyFnMap2} from "./objUtils";
 import {trim} from "./stringUtils";
 import {Null} from "./types";
+import {sanitizeURLProtocol} from "./urlUtils";
 
 export const ENTITY_TYPE_TECHNOLOGY_DEVELOPER = "Technology developer";
 
@@ -44,7 +45,7 @@ export const makeCompany = applyFnMap2({
     // Organisation details
     "Name": _.identity,
     "Project / product name": _.identity,
-    "Link": _.identity,
+    "Link": sanitizeURLProtocol,
     "Latitude": processCoordValue,
     "Longitude": processCoordValue,
 
@@ -73,6 +74,7 @@ export const makeCompany = applyFnMap2({
 
 export const getLngLat = _.collect(_.getKey("Longitude"), _.getKey("Latitude"));
 export const getID = _.getKey("Name");
+export const getLink = _.getKey("Link");
 
 // entity types [] -> obj -> entity types getters
 const makePropertiesGetters = _.pipe(

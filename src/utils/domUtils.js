@@ -26,8 +26,11 @@ export const moveNode = (node, newContainer) =>
 
 /* make attrs */
 
+// obj => style string
 export const makeStyle = _.pipe(
     _.pairs,
     _.mapWith(joinWithColon),
     joinWithSemicolon
 );
+
+export const toPx = number => `${number}px`;

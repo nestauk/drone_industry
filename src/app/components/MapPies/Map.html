@@ -40,15 +40,9 @@
         KEY_TO_ENABLE_SCROLL,
         KEY_TO_ENABLE_SCROLL_EVENTS
     } from "./consts";
-    import {getElementGeometry, makeStyle} from "@utils/domUtils";
+    import {getElementGeometry, makeStyle, toPx} from "@utils/domUtils";
     import {tap} from "@utils/debugUtils";
-    import {sanitizeURLProtocol} from "@utils/urlUtils";
     import {toGeoPoints} from "@utils/geoUtils";
-
-    const getSanitizedLink = _.pipe(
-        _.getKey("Link"),
-        sanitizeURLProtocol
-    );
 
     const pie =
         d3.pie()
@@ -151,8 +145,6 @@
                     accessToken,
                     styleURL,
                     viewport,
-                    withZoomControl,
-                    withScaleControl,
                 } = this.get();
                 const {center, zoom} = viewport;
 
@@ -198,15 +190,6 @@
                 }))
             },
 
-            addZoomControl () {
-                this.map.addControl(
-                    new mapboxgl.NavigationControl({
-                        showCompass: false
-                    }),
-                    "bottom-left"
-                );
-            },
-
             addScaleControl () {
                 this.map.addControl(
                     new mapboxgl.ScaleControl({
@@ -214,6 +197,15 @@
                         unit: "metric"
                     }),
                     "bottom-right"
+                );
+            },
+
+            addZoomControl () {
+                this.map.addControl(
+                    new mapboxgl.NavigationControl({
+                        showCompass: false
+                    }),
+                    "bottom-left"
                 );
             },
 
@@ -241,12 +233,19 @@
                 const {width, height} = this.get();
 
                 this.markersContainer
-                .attr("width", width)
-                .attr("height", height);
+                .attr("width", toPx(width))
+                .attr("height", toPx(height));
             },
 
             updateMarkers () {
-                const {getItemID, items, makePie, arc, getColor} = this.get();
+                const {
+                    arc,
+                    getColor,
+                    getItemID,
+                    getLink,
+                    items,
+                    makePie
+                } = this.get();
 
                 let marker =
                     this.markersContainer
@@ -259,7 +258,8 @@
                     marker.enter()
                     .append("g")
                     .attr("class", "marker")
-                    .style("cursor", "crosshair")
+                    .attr("fill-opacity", 0.75)
+                    .style("cursor", "pointer")
                     .on("mouseout", d => {
                         this.resetInfoPanel();
                     })
@@ -269,7 +269,7 @@
 
                 markerEnter
                     .append("a")
-                    .attr("xlink:href", getSanitizedLink)
+                    .attr("xlink:href", getLink)
                     .attr("target", "_blank")
                     .attr("xlink:show", "new");
 
@@ -323,16 +323,10 @@
                 const hStyle = (x < width / 2)
                     ? {left: x + safety}
                     : {right: width - x + safety};
-                const style = makeStyle(
-                    _.mapValues(
-                        _.merge({}, vStyle, hStyle),
-                        v => `${v}px`
-                    )
-                );
+                const styleObj = _.merge({}, vStyle, hStyle);
+                const style = makeStyle(_.mapValues(styleObj, toPx));
 
-                this.set({
-                    infopanel: _.merge(d, {style})
-                });
+                this.set({infopanel: _.merge(d, {style})});
             },
 
             resetInfoPanel (d) {
