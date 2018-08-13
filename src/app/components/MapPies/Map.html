@@ -145,6 +145,8 @@
                     accessToken,
                     styleURL,
                     viewport,
+                    withScaleControl,
+                    withZoomControl
                 } = this.get();
                 const {center, zoom} = viewport;
 
@@ -407,7 +409,7 @@
                 }
             },
         },
-        
+
         helpers: {
             getSanitizedLink
         }
