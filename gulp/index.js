@@ -3,6 +3,7 @@ import "./readme";
 import "./data";
 import "./html";
 import "./mapbox";
+import "./modernizr";
 import "./rollup";
 import "./build";
 import "./serve";

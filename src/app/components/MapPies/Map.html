@@ -416,7 +416,9 @@
                 .on("zoom", zoomed)
                 .on("zoomend", zoomed);
 
-                this.setMapTouchEvents();
+                if (Modernizr.touchevents) {
+                    this.setMapTouchEvents();
+                }
             },
 
             // dragPan

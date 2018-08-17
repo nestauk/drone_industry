@@ -4,12 +4,12 @@
   "author": "Luca Bonavita - nesta.org.uk",
   "version": "0.0.1",
   "scripts": {
-    "nb": "rm -rf build && mkdir build",
-    "devbuild": "npm run nb && gulp build --fullscreen",
-    "prodbuild": "npm run nb && gulp build --fullscreen --production",
-    "dev": "npm run nb && gulp",
-    "prod": "npm run nb && gulp --production",
-    "deploy": "npm run nb && gulp deploy --fullscreen --production"
+    "newdir": "rm -rf build && mkdir build",
+    "devbuild": "npm run newdir && gulp build --fullscreen",
+    "prodbuild": "npm run newdir && gulp build --fullscreen --production",
+    "dev": "npm run newdir && gulp",
+    "prod": "npm run newdir && gulp --production",
+    "deploy": "npm run newdir && gulp deploy --fullscreen --production"
   },
   "license": "MIT",
   "dependencies": {
@@ -22,7 +22,8 @@
     "d3-shape": "^1.2.0",
     "ionicons": "^4.2.4",
     "lamb": "^0.55.0",
-    "mapbox-gl": "^0.47.0"
+    "mapbox-gl": "^0.47.0",
+    "modernizr": "^3.6.0"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",

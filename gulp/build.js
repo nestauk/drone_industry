@@ -6,5 +6,6 @@ gulp.task("build", gulp.parallel(
     "copy.data",
     "copy.mapboxgl.css",
     "copy.html",
+    "modernizr",
     "rollup"
 ));
