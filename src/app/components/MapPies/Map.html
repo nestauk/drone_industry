@@ -12,16 +12,18 @@
     on:wheel="onwheel(event)"
 >
     <div ref:mapcontainer></div>
+
+    <Shield
+        isActive="{isShieldActive}"
+        message="{shieldMessage}"
+        on:animationDone="hideShield()"
+    />
+
     {#if infopanel}
     <div ref:infopanel style={infopanel.style}>
         {infopanel.Name}
     </div>
     {/if}
-    <Scrollshield
-        isVisible="{isScrollshieldVisible}"
-        keyToEnableScroll="{keyToEnableScroll}"
-        on:animationDone="hideScrollShield()"
-    />
 </div>
 
 <script>
@@ -51,7 +53,7 @@
 
     export default {
         components: {
-            Scrollshield: "./Scrollshield.html"
+            Shield: "./Shield.html"
         },
 
         /* state */
@@ -63,9 +65,14 @@
                 zoom: MAPBOXGL_MIN_ZOOM,
                 infopanel: null,
                 infopanelMargin: 5,
-                isScrollshieldVisible: false,
+                isShieldActive: false,
+                shieldMessage: "",
                 isPointerOverMap: false,
-                keyToEnableScroll: KEY_TO_ENABLE_SCROLL
+                keyToEnableScroll: KEY_TO_ENABLE_SCROLL,
+                fingers: 0,
+
+                // has to be true, setting it in the state for consistency
+                isDragEnabled: true,
             }
         },
         computed: {
@@ -146,7 +153,8 @@
                     styleURL,
                     viewport,
                     withScaleControl,
-                    withZoomControl
+                    withZoomControl,
+                    isDragEnabled
                 } = this.get();
                 const {center, zoom} = viewport;
 
@@ -158,13 +166,18 @@
                     zoom,
                     style: styleURL,
                     renderWorldCopies: false,
-                    pitchWithRotate: false,
-                    touchZoomRotate: false,
-                    keyboard: false,
-                    scrollZoom: false,
+
+                    // interactions
+                    scrollZoom: false,  // shielded
+                    touchZoomRotate: true,
+                    dragPan: isDragEnabled,
                     dragRotate: false,
-                    // hash: true,
+                    // we don't render dots in perspective
+                    pitchWithRotate: false,
+
+                    // we add this later to have it compact
                     attributionControl: false,
+
                 })
                 .on("load", () => {
                     this.addContainer();
@@ -173,7 +186,24 @@
                     this.setMapEvents();
                     this.fitBoundsToItems();
                     this.enableItemsEditing();
+
+                    // ipad FIXME: initial svg is 100x100
+                    this.setGeometry();
                 });
+
+                // input events
+
+                this.map.touchZoomRotate.disableRotation();
+
+                // controls
+
+                this.addControls();
+            },
+
+            /* controls */
+
+            addControls () {
+                const {withZoomControl, withScaleControl} = this.get();
 
                 this.addAttributionControl();
 
@@ -211,18 +241,23 @@
                 );
             },
 
-            setMapEvents () {
-                const zoomed = () => {
-                    this.projectMarkers();
-                    this.set({zoom: this.map.getZoom()})
-                };
+            /* zoom */
 
-                this.map
-                .on("move", () => {this.projectMarkers()})
-                .on("resize", () => {this.projectMarkers()})
-                .on("zoom", zoomed)
-                .on("zoomend", zoomed)
+            fitBoundsToItems () {
+                const {boundingBox} = this.get();
+
+                this.map.fitBounds(boundingBox, {
+                    linear: true,
+                    padding: {
+                        top: FIT_PADDING,
+                        bottom: FIT_PADDING,
+                        left: FIT_PADDING,
+                        right: FIT_PADDING
+                    }
+                });
             },
+
+            /* container */
 
             addContainer () {
                 this.markersContainer =
@@ -238,6 +273,8 @@
                 .attr("width", toPx(width))
                 .attr("height", toPx(height));
             },
+
+            /* markers */
 
             updateMarkers () {
                 const {
@@ -289,9 +326,8 @@
 
                 sector.merge(enter)
                 .attr("d", arc)
-                .style("cursor", "pointer")
-                .style("fill", getColor)
-                .style("fill-opacity", 0.75);
+                .attr("fill", getColor)
+                ;
             },
 
             updateMarkersRadius () {
@@ -313,6 +349,8 @@
                     return `translate(${x},${y})`;
                 });
             },
+
+            /* tooltip */
 
             setInfoPanel (d) {
                 const {width, height, infopanelMargin, pieRadius} = this.get();
@@ -338,50 +376,88 @@
                 });
             },
 
-            fitBoundsToItems () {
-                const {boundingBox} = this.get();
-
-                this.map.fitBounds(boundingBox, {
-                    linear: true,
-                    padding: {
-                        top: FIT_PADDING,
-                        bottom: FIT_PADDING,
-                        left: FIT_PADDING,
-                        right: FIT_PADDING
-                    }
-                });
-            },
-
             enableItemsEditing () {
                 this.fire("enableItemsEditing");
             },
 
-            // scrollshield
+            /* shield */
 
-            showScrollShield () {
-                this.set({isScrollshieldVisible: true});
+            showShield (msgType) {
+                let shieldMessage = "";
+                switch (msgType) {
+                    case "scroll":
+                        const {keyToEnableScroll} = this.get();
+                        shieldMessage = `${keyToEnableScroll}-scroll to zoom`;
+                        break;
+                    case "pinch":
+                        shieldMessage = "Please use two fingers to drag and zoom";
+                        break;
+                    default:
+                        break;
+                };
+
+                this.set({isShieldActive: true, shieldMessage});
             },
-            hideScrollShield () {
-                this.set({isScrollshieldVisible: false});
+            hideShield () {
+                this.set({isShieldActive: false, shieldMessage: ""});
+            },
+
+            /* events */
+
+            setMapEvents () {
+                const zoomed = ({target: map}) => {
+                    this.projectMarkers();
+                    this.set({zoom: map.getZoom()})
+                };
+
+                this.map
+                .on("move", () => {this.projectMarkers()})
+                .on("resize", () => {this.projectMarkers()})
+                .on("zoom", zoomed)
+                .on("zoomend", zoomed);
+
+                this.setMapTouchEvents();
+            },
+
+            // dragPan
+
+            enableDragToPan (event) {
+                this.map.dragPan.enable();
+                this.set({isDragEnabled: true});
+            },
+            disableDragToPan (event) {
+                this.map.dragPan.disable();
+                this.set({isDragEnabled: false});
+            },
+
+            /* desktop */
+
+            // pointer
+
+            setPointerEntered () {
+                this.set({isPointerOverMap: true});
+            },
+            setPointerExited () {
+                this.set({isPointerOverMap: false});
             },
 
             // scrollZoom
 
             enableScrollToZoom (event) {
-                this.map.scrollZoom.enable();
+                this.map && this.map.scrollZoom.enable();
             },
             disableScrollToZoom (event) {
-                this.map.scrollZoom.disable();
+                this.map && this.map.scrollZoom.disable();
             },
 
-            // events: keys
+            // key events
 
             onkeydown (event) {
                 const {keyToEnableScroll, isPointerOverMap} = this.get();
 
                 if (isPointerOverMap && event.key === keyToEnableScroll) {
                     this.enableScrollToZoom();
-                    this.hideScrollShield();
+                    this.hideShield();
                 }
             },
             onkeyup (event) {
@@ -392,26 +468,64 @@
                 }
             },
 
-            // events: pointer
+            // mouse events
 
             onmouseenter (event) {
-                this.set({isPointerOverMap: true});
-                this.showScrollShield();
+                this.setPointerEntered();
             },
             onmouseleave (event) {
-                this.set({isPointerOverMap: false});
+                this.setPointerExited();
+                this.hideShield();
                 this.disableScrollToZoom();
-                this.hideScrollShield();
             },
             onwheel (event) {
                 if (!event[KEY_TO_ENABLE_SCROLL_EVENTS]) {
-                    this.showScrollShield();
+                    this.showShield("scroll");
                 }
             },
-        },
 
-        helpers: {
-            getSanitizedLink
+            /* touch device: note that
+            - @touchstart, mapTouchEvent.points is the list of fingers we HAVE ON the map
+            - @touchend, mapTouchEvent.points is the list of fingers we have REMOVED FROM the map
+            */
+            setMapTouchEvents () {
+                this.map
+                .on("touchstart", mapTouchEvent => {
+                    const currentFingers = mapTouchEvent.points.length;
+
+                    if (currentFingers === 1) {
+                        this.showShield("pinch");
+                    } else {
+                        this.hideShield();
+                    }
+
+                    this.set({fingers: currentFingers});
+                })
+                .on("touchmove", mapTouchEvent => {
+                    const {fingers, isDragEnabled} = this.get();
+
+                    if (fingers === 1) {
+                        isDragEnabled && this.disableDragToPan();
+                    } else {
+                        !isDragEnabled && this.enableDragToPan();
+                    }
+                })
+                .on("touchend", mapTouchEvent => {
+                    const {fingers: previousFingers} = this.get();
+                    const removedFingers = mapTouchEvent.points.length;
+                    const currentFingers = previousFingers - removedFingers;
+
+                    if (currentFingers === 1) {
+                        this.disableDragToPan();
+                        this.showShield("pinch");
+                    } else {
+                        this.enableDragToPan();
+                        this.hideShield();
+                    }
+
+                    this.set({fingers: currentFingers});
+                });
+            }
         }
     }
 </script>
