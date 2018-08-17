@@ -21,7 +21,9 @@
 
     {#if infopanel}
     <div ref:infopanel style={infopanel.style}>
+        <a href="{infopanel.Link}" target="_blank">
         {infopanel.Name}
+        </a>
     </div>
     {/if}
 </div>
@@ -299,25 +301,14 @@
                     .attr("class", "marker")
                     .attr("fill-opacity", 0.75)
                     .style("cursor", "pointer")
-                    .on("mouseout", d => {
-                        this.resetInfoPanel();
-                    })
-                    .on("mouseover", d => {
+                    .on("click", d => {
                         this.setInfoPanel(d);
                     });
-
-                markerEnter
-                    .append("a")
-                    .attr("xlink:href", getLink)
-                    .attr("target", "_blank")
-                    .attr("xlink:show", "new");
 
                 this.marker = marker.merge(markerEnter);
 
                 let sector =
-                    this.marker
-                    .select("a")
-                    .selectAll(".sector")
+                    this.marker.selectAll(".sector")
                     .data(makePie);
 
                 const enter = sector.enter()
@@ -370,10 +361,7 @@
             },
 
             resetInfoPanel (d) {
-                this.set({
-                    infopanel: null,
-                    infopanelStyle: null
-                });
+                this.set({infopanel: null});
             },
 
             enableItemsEditing () {
@@ -406,13 +394,20 @@
 
             setMapEvents () {
                 const zoomed = ({target: map}) => {
+                    this.resetInfoPanel();
                     this.projectMarkers();
                     this.set({zoom: map.getZoom()})
                 };
 
                 this.map
-                .on("move", () => {this.projectMarkers()})
-                .on("resize", () => {this.projectMarkers()})
+                .on("move", () => {
+                    this.resetInfoPanel();
+                    this.projectMarkers();
+                })
+                .on("resize", () => {
+                    this.resetInfoPanel();
+                    this.projectMarkers();
+                })
                 .on("zoom", zoomed)
                 .on("zoomend", zoomed);
 
@@ -501,6 +496,7 @@
                         this.hideShield();
                     }
 
+                    this.resetInfoPanel();
                     this.set({fingers: currentFingers});
                 })
                 .on("touchmove", mapTouchEvent => {
@@ -558,10 +554,14 @@
         position: absolute;
         background-color: rgb(255, 255, 255, 0.7);
         box-shadow: 3px 3px 3px #c1c1c1;
-        pointer-events: none;
 
         font-weight: bold;
         line-height: 1em;
         padding: 0.5em;
+    }
+
+    ref:infopanel a {
+        text-decoration: none;
+        color: black;
     }
 </style>
