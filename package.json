@@ -31,6 +31,7 @@
     "babel-preset-env": "^1.7.0",
     "babel-register": "^6.26.0",
     "browser-sync": "^2.24.6",
+    "connect-logger": "0.0.1",
     "gh-pages": "^1.2.0",
     "gulp": "^4.0.0",
     "minimist": "^1.2.0",

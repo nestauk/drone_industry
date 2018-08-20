@@ -133,14 +133,12 @@ class DronesStore extends Store {
         });
     }
 
-    async fetch () {
+    fetch () {
         const {companiesURL} = this.get();
 
-        const allCompanies = await d3.tsv(companiesURL, makeCompany);
-
-        this.set({allCompanies});
-
-        // this.debug();
+        d3.tsv(companiesURL, makeCompany).then(allCompanies => {
+            this.set({allCompanies});
+        })
     }
 
     debug () {

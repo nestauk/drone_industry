@@ -1,7 +1,13 @@
 import gulp from "gulp";
 import BrowserSync from "browser-sync";
+import logger from "connect-logger";
 
 const browserSync = BrowserSync.create();
+
+// to inspect connections from Browserstack
+const log = logger();
+
+const getTime = () => new Date().getTime();
 
 gulp.task("serve", done => {
     browserSync.init({
@@ -13,6 +19,16 @@ gulp.task("serve", done => {
         reloadOnRestart: true,
         notify: false,
         ghostMode: false,
+        middleware: [
+            log,
+            // {
+            //     route: "/embedded/bundle.js",
+            //     handle: log
+            // }, {
+            //     route: "/fullscreen/bundle.js",
+            //     handle: log
+            // }
+        ],
 
         // watch & inject
         watch: true,

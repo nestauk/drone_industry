@@ -1,7 +1,6 @@
 import gulp from "gulp";
 
 import {makeBuildSubpath} from "./index";
-import {browserSync} from "./serve";
 import options from "./options";
 
 const INDEX_HTML_PATH = "src/app/index.html";
