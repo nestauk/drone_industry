@@ -59,12 +59,13 @@ const makeBuildConfig = (appConfig, isProductionBuild) => {
                 resolve(),
                 commonjs(),
 
-                // isProductionBuild && buble({
+                // buble({
                 //     include: [
                 //         "src/**",
                 //         "node_modules/svelte/shared.js"
                 //     ]
                 // }),
+                isProductionBuild && buble(),
                 isProductionBuild && terser()
             ],
             cache: true
