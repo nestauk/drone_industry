@@ -94,7 +94,6 @@
             Loading: "./Loading.html",
             MapPies: "./MapPies/MapPies.html",
             NestaFooter: "./NestaFooter/NestaFooter.html",
-            // Window: "./Window.html",
         },
 
         // state
@@ -137,7 +136,7 @@
                 } else {
                     this.set({activeAbout: id});
                 }
-            },
+            }
         },
 
         helpers: {
@@ -152,6 +151,7 @@
         height: 100%;
         overflow-x: hidden;
         overflow-y: APP_OVERFLOW_Y; /* replaced by rollup... */
+        /* overflow-y: APP_OVERFLOW_Y !important; /* replaced by rollup... */ */
     }
 
     header {

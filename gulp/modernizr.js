@@ -12,6 +12,7 @@ const makeModernizrBuild = options =>
 
 const modernizrOpts = {
     "feature-detects": [
+        "network/fetch",
         "touchevents"
     ]
 };

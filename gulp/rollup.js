@@ -38,6 +38,7 @@ const makeBuildConfig = (appConfig, isProductionBuild) => {
                     values: {
                         WITH_NESTA_FOOTER: withNestaFooter,
                         APP_OVERFLOW_Y: withNestaFooter ? "auto" : "hidden"
+                        // APP_OVERFLOW_Y: withNestaFooter ? "scroll" : "hidden"
                     }
                 }),
                 alias(resolveAliases({
@@ -59,13 +60,30 @@ const makeBuildConfig = (appConfig, isProductionBuild) => {
                 resolve(),
                 commonjs(),
 
+                isProductionBuild && buble(),
+                // buble(),
                 // buble({
                 //     include: [
                 //         "src/**",
                 //         "node_modules/svelte/shared.js"
                 //     ]
                 // }),
-                isProductionBuild && buble(),
+
+                // babel({
+                //     // exclude: 'node_modules/**',
+                //     include: [
+                //         "src/**",
+                //         "node_modules/svelte/shared.js"
+                //     ],
+                //     babelrc: false,
+                //     presets: [["env", {
+                //         "targets": {
+                //             "browsers": ["ie >= 11", "last 2 versions", ]
+                //         },
+                //         modules: false
+                //     }]]
+                // }),
+
                 isProductionBuild && terser()
             ],
             cache: true

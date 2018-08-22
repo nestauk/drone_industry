@@ -73,8 +73,8 @@
                 keyToEnableScroll: KEY_TO_ENABLE_SCROLL,
                 fingers: 0,
 
-                // has to be true, setting it in the state for consistency
-                isDragEnabled: true,
+                // has to be true initially, setting it in the state for consistency
+                isInteractive: true,
             }
         },
         computed: {
@@ -156,7 +156,7 @@
                     viewport,
                     withScaleControl,
                     withZoomControl,
-                    isDragEnabled
+                    isInteractive
                 } = this.get();
                 const {center, zoom} = viewport;
 
@@ -171,8 +171,8 @@
 
                     // interactions
                     scrollZoom: false,  // shielded
-                    touchZoomRotate: true,
-                    dragPan: isDragEnabled,
+                    touchZoomRotate: isInteractive,
+                    dragPan: isInteractive,
                     dragRotate: false,
                     // we don't render dots in perspective
                     pitchWithRotate: false,
@@ -378,7 +378,7 @@
                         shieldMessage = `${keyToEnableScroll}-scroll to zoom`;
                         break;
                     case "pinch":
-                        shieldMessage = "Please use two fingers to drag and zoom";
+                        shieldMessage = "Use two fingers to drag and zoom";
                         break;
                     default:
                         break;
@@ -416,15 +416,17 @@
                 }
             },
 
-            // dragPan
+            // interactivity
 
-            enableDragToPan (event) {
+            enableInteractivity (event) {
                 this.map.dragPan.enable();
-                this.set({isDragEnabled: true});
+                this.map.touchZoomRotate.enable();
+                this.set({isInteractive: true});
             },
-            disableDragToPan (event) {
+            disableInteractivity (event) {
                 this.map.dragPan.disable();
-                this.set({isDragEnabled: false});
+                this.map.touchZoomRotate.disable();
+                this.set({isInteractive: false});
             },
 
             /* desktop */
@@ -482,7 +484,7 @@
             },
 
             /* touch device: note that
-            - @touchstart, mapTouchEvent.points is the list of fingers we HAVE ON the map
+            - @touchstart, mapTouchEvent.points is the list of fingers ON the map
             - @touchend, mapTouchEvent.points is the list of fingers we have REMOVED FROM the map
             */
             setMapTouchEvents () {
@@ -490,22 +492,24 @@
                 .on("touchstart", mapTouchEvent => {
                     const currentFingers = mapTouchEvent.points.length;
 
-                    if (currentFingers === 1) {
-                        this.showShield("pinch");
-                    } else {
-                        this.hideShield();
-                    }
+                    // if (currentFingers === 1) {
+                    //     this.showShield("pinch");
+                    // } else {
+                    //     this.hideShield();
+                    // }
 
                     this.resetInfoPanel();
                     this.set({fingers: currentFingers});
                 })
                 .on("touchmove", mapTouchEvent => {
-                    const {fingers, isDragEnabled} = this.get();
+                    const {fingers, isInteractive, isShieldActive} = this.get();
 
                     if (fingers === 1) {
-                        isDragEnabled && this.disableDragToPan();
+                        !isShieldActive && this.showShield("pinch");
+                        isInteractive && this.disableInteractivity();
                     } else {
-                        !isDragEnabled && this.enableDragToPan();
+                        isShieldActive && this.this.hideShield();
+                        !isInteractive && this.enableInteractivity();
                     }
                 })
                 .on("touchend", mapTouchEvent => {
@@ -514,10 +518,10 @@
                     const currentFingers = previousFingers - removedFingers;
 
                     if (currentFingers === 1) {
-                        this.disableDragToPan();
+                        this.disableInteractivity();
                         this.showShield("pinch");
                     } else {
-                        this.enableDragToPan();
+                        this.enableInteractivity();
                         this.hideShield();
                     }
 
@@ -538,6 +542,16 @@
     ref:mapcontainer {
         width: 100%;
         height: 100%;
+    }
+
+    /*
+    When we shield touch-drag mapbox sets this to none
+    preventing to scroll with 1-finger on Android and Windows.
+    FIXME: modifying the map css is a HACK as it might change in the future,
+    let's not rely on this. TODO file an question/issue on mapbox's github
+    */
+    :global(.mapboxgl-canvas-container) {
+        touch-action: auto !important;
     }
 
     svg {

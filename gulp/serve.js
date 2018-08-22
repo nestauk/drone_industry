@@ -2,6 +2,8 @@ import gulp from "gulp";
 import BrowserSync from "browser-sync";
 import logger from "connect-logger";
 
+import pkg from "../package.json";
+
 const browserSync = BrowserSync.create();
 
 // to inspect connections from Browserstack
@@ -47,7 +49,7 @@ gulp.task("serve", done => {
             "build/embedded/bundle.js.map",
         ],
 
-        logPrefix: "Drone Industry"
+        logPrefix: `${pkg.name}`
     });
 
     done();

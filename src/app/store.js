@@ -136,9 +136,18 @@ class DronesStore extends Store {
     fetch () {
         const {companiesURL} = this.get();
 
-        d3.tsv(companiesURL, makeCompany).then(allCompanies => {
-            this.set({allCompanies});
-        })
+        if (Modernizr.fetch) {
+            d3.tsv(companiesURL, makeCompany).then(allCompanies => {
+                this.set({allCompanies});
+            });
+        } else {
+            // IE...
+            d3.tsv_request(companiesURL, (error, allRawCompanies) => {
+                if (error) throw error;
+
+                this.set({allCompanies: _.map(allRawCompanies, makeCompany)});
+            });
+        }
     }
 
     debug () {
