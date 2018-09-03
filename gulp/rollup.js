@@ -61,27 +61,11 @@ const makeBuildConfig = (appConfig, isProductionBuild) => {
                 commonjs(),
 
                 isProductionBuild && buble(),
-                // buble(),
-                // buble({
+                // isProductionBuild && buble({
                 //     include: [
                 //         "src/**",
                 //         "node_modules/svelte/shared.js"
                 //     ]
-                // }),
-
-                // babel({
-                //     // exclude: 'node_modules/**',
-                //     include: [
-                //         "src/**",
-                //         "node_modules/svelte/shared.js"
-                //     ],
-                //     babelrc: false,
-                //     presets: [["env", {
-                //         "targets": {
-                //             "browsers": ["ie >= 11", "last 2 versions", ]
-                //         },
-                //         modules: false
-                //     }]]
                 // }),
 
                 isProductionBuild && terser()
