@@ -400,6 +400,9 @@
                 };
 
                 this.map
+                .on("mousedown", () => {
+                    this.resetInfoPanel();
+                })
                 .on("move", () => {
                     this.resetInfoPanel();
                     this.projectMarkers();
